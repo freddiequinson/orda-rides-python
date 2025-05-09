@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrDa Rides - Book a Ride</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #F5F5F5;
+        }
+        
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 100vh;
+            background-color: white;
+            overflow: hidden;
+        }
+        
+        .map-placeholder {
+            height: 250px;
+            background-color: #E0E0E0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .map-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 10;
+            cursor: pointer;
+        }
+        
+        .booking-form {
+            padding: 20px;
+        }
+        
+        .location-input {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .location-icon {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .location-select {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            outline: none;
+            padding: 0 10px;
+        }
+        
+        .custom-select-container {
+            position: relative;
+            flex: 1;
+        }
+        
+        .location-input-field {
+            width: 100%;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            outline: none;
+            padding: 0 10px;
+        }
+        
+        .custom-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        
+        .dropdown-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #F5F5F5;
+        }
+        
+        .dropdown-item.highlighted {
+            background-color: #F5F5F5;
+        }
+        
+        .search-button {
+            width: 100%;
+            padding: 16px;
+            background-color: #00C853;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .search-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: white;
+            z-index: 40;
+            max-width: 500px;
+            margin: 0 auto;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .overlay-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-button-small {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        
+        .overlay-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .ride-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .ride-option.active {
+            border: 2px solid #00C853;
+            background-color: rgba(0,200,83,0.05);
+        }
+        
+        .time-badge {
+            background-color: #00C853;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .arrival-badge {
+            background-color: #4285F4;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Map Placeholder -->
+    <div class="map-placeholder">
+        <img src="https://maps.googleapis.com/maps/api/staticmap?center=5.8142,-0.4913&zoom=14&size=600x400&markers=color:green%7Clabel:A%7C5.8142,-0.4913&markers=color:blue%7Clabel:B%7C5.8160,-0.4930&path=color:0x4285F4|weight:5|5.8142,-0.4913|5.8160,-0.4930&key=YOUR_API_KEY" alt="Map">
+        <div class="map-overlay">
+            <div id="time-badge" class="time-badge">
+                <div style="font-size: 1.2rem;">9</div>
+                <div style="font-size: 0.7rem;">min</div>
+            </div>
+            <div id="arrival-badge" class="arrival-badge">Arrive by 1:33 AM</div>
+        </div>
+        <button id="back-button" class="back-button">
+            <span style="font-size: 18px;">←</span>
+        </button>
+    </div>
+    
+    <!-- Booking Form -->
+    <div class="booking-form">
+        <h2 style="margin-bottom: 20px; font-size: 1.5rem;">Book a Ride</h2>
+        
+        <!-- Location Inputs -->
+        <div>
+            <!-- Pickup Input -->
+            <div class="location-input">
+                <div class="location-icon">🏍️</div>
+                <div class="custom-select-container">
+                    <input type="text" id="pickup-input" class="location-input-field" placeholder="Enter pickup location" autocomplete="off">
+                    <div id="pickup-dropdown" class="custom-select-dropdown">
+                        <div class="dropdown-item" data-value="My Current Location">My Current Location</div>
+                        <div class="dropdown-item" data-value="Adeiso Market">Adeiso Market</div>
+                        <div class="dropdown-item" data-value="Adeiso Hospital">Adeiso Hospital</div>
+                        <div class="dropdown-item" data-value="Adeiso School">Adeiso School</div>
+                        <div class="dropdown-item" data-value="Adeiso Town Center">Adeiso Town Center</div>
+                        <div class="dropdown-item" data-value="Nsawam Bus Station">Nsawam Bus Station</div>
+                        <div class="dropdown-item" data-value="Nsawam Market">Nsawam Market</div>
+                        <div class="dropdown-item" data-value="Nsawam Hospital">Nsawam Hospital</div>
+                        <div class="dropdown-item" data-value="Pakro Junction">Pakro Junction</div>
+                        <div class="dropdown-item" data-value="Adoagyiri">Adoagyiri</div>
+                        <div class="dropdown-item" data-value="Coaltar">Coaltar</div>
+                        <div class="dropdown-item" data-value="Asamankese">Asamankese</div>
+                        <div class="dropdown-item" data-value="Suhum">Suhum</div>
+                        <div class="dropdown-item" data-value="Koforidua">Koforidua</div>
+                        <div class="dropdown-item" data-value="Akuse Junction">Akuse Junction</div>
+                    </div>
+                    <input type="hidden" id="pickup-select" value="">
+                </div>
+            </div>
+            
+            <!-- Destination Input -->
+            <div class="location-input">
+                <div class="location-icon">📍</div>
+                <div class="custom-select-container">
+                    <input type="text" id="destination-input" class="location-input-field" placeholder="Enter destination" autocomplete="off">
+                    <div id="destination-dropdown" class="custom-select-dropdown">
+                        <div class="dropdown-item" data-value="Adeiso Market">Adeiso Market</div>
+                        <div class="dropdown-item" data-value="Adeiso Hospital">Adeiso Hospital</div>
+                        <div class="dropdown-item" data-value="Adeiso School">Adeiso School</div>
+                        <div class="dropdown-item" data-value="Adeiso Town Center">Adeiso Town Center</div>
+                        <div class="dropdown-item" data-value="Nsawam Bus Station">Nsawam Bus Station</div>
+                        <div class="dropdown-item" data-value="Nsawam Market">Nsawam Market</div>
+                        <div class="dropdown-item" data-value="Nsawam Hospital">Nsawam Hospital</div>
+                        <div class="dropdown-item" data-value="Pakro Junction">Pakro Junction</div>
+                        <div class="dropdown-item" data-value="Adoagyiri">Adoagyiri</div>
+                        <div class="dropdown-item" data-value="Coaltar">Coaltar</div>
+                        <div class="dropdown-item" data-value="Asamankese">Asamankese</div>
+                        <div class="dropdown-item" data-value="Suhum">Suhum</div>
+                        <div class="dropdown-item" data-value="Koforidua">Koforidua</div>
+                        <div class="dropdown-item" data-value="Akuse Junction">Akuse Junction</div>
+                    </div>
+                    <input type="hidden" id="destination-select" value="">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Find Riders Button -->
+        <button id="search-button" class="search-button" disabled>Find Riders</button>
+    </div>
+    
+    <!-- Riders Section (hidden by default) -->
+    <div id="riders-section" class="overlay">
+        <div class="overlay-header">
+            <button id="back-to-form-button" class="back-button-small">←</button>
+            <h3 class="overlay-title">Choose your ride</h3>
+        </div>
+        
+        <div style="padding: 20px;">
+            <!-- Ride Info -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div>
+                    <div id="ride-route" style="font-weight: 500; margin-bottom: 5px;">Adeiso Market → Adeiso Hospital</div>
+                    <div style="display: flex; align-items: center;">
+                        <span id="ride-time" style="font-size: 0.9rem; color: #757575; margin-right: 15px;">9 min</span>
+                        <span id="ride-distance" style="font-size: 0.9rem; color: #757575;">2.5 km</span>
+                    </div>
+                </div>
+                <button id="change-route-button" style="background: none; border: none; color: #00C853; font-weight: 500; cursor: pointer;">Change</button>
+            </div>
+            
+            <!-- Ride Options -->
+            <div>
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Riders Near You</h4>
+                
+                <!-- Rider 1 -->
+                <div class="ride-option active" data-price="GH₵ 27" data-time="5 min" data-rider-name="John Doe" data-rating="4.8" data-bike="Honda CG 125" data-avatar="https://randomuser.me/api/portraits/men/32.jpg">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; overflow: hidden; margin-right: 15px;">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rider" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">John Doe</div>
+                        <div style="font-size: 0.8rem; color: #757575;">
+                            <span style="color: #FFB400; margin-right: 3px;">★</span>4.8 <span style="margin: 0 5px;">•</span> Honda CG 125 <span style="margin: 0 5px;">•</span> 5 min away
+                        </div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 27</div>
+                </div>
+                
+                <!-- Rider 2 -->
+                <div class="ride-option" data-price="GH₵ 25" data-time="7 min" data-rider-name="Sarah Johnson" data-rating="4.6" data-bike="Yamaha YBR 125" data-avatar="https://randomuser.me/api/portraits/women/44.jpg">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; overflow: hidden; margin-right: 15px;">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Rider" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Sarah Johnson</div>
+                        <div style="font-size: 0.8rem; color: #757575;">
+                            <span style="color: #FFB400; margin-right: 3px;">★</span>4.6 <span style="margin: 0 5px;">•</span> Yamaha YBR 125 <span style="margin: 0 5px;">•</span> 7 min away
+                        </div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 25</div>
+                </div>
+                
+                <!-- Rider 3 -->
+                <div class="ride-option" data-price="GH₵ 31" data-time="3 min" data-rider-name="Michael Osei" data-rating="4.9" data-bike="Bajaj Boxer 150" data-avatar="https://randomuser.me/api/portraits/men/22.jpg">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; overflow: hidden; margin-right: 15px;">
+                        <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Rider" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Michael Osei</div>
+                        <div style="font-size: 0.8rem; color: #757575;">
+                            <span style="color: #FFB400; margin-right: 3px;">★</span>4.9 <span style="margin: 0 5px;">•</span> Bajaj Boxer 150 <span style="margin: 0 5px;">•</span> 3 min away
+                        </div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 31</div>
+                </div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div style="margin: 20px 0;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Payment Method</h4>
+                
+                <!-- Payment Options -->
+                <div id="payment-options">
+                    <!-- Cash Option -->
+                    <div id="cash-option" class="payment-option active" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 40px; height: 40px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <span style="font-size: 20px;">💵</span>
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">Cash</div>
+                                <div style="font-size: 0.8rem; color: #757575;">Pay with cash</div>
+                            </div>
+                        </div>
+                        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #00C853; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 12px; height: 12px; background-color: #00C853; border-radius: 50%;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- MoMo Option -->
+                    <div id="momo-option" class="payment-option" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; border-radius: 12px; cursor: pointer; border: 2px solid transparent;">
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 40px; height: 40px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <span style="font-size: 20px;">📱</span>
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">Mobile Money</div>
+                                <div style="font-size: 0.8rem; color: #757575;">Pay with MoMo</div>
+                            </div>
+                        </div>
+                        <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 12px; height: 12px; background-color: transparent; border-radius: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Select Button -->
+            <button id="select-ride-button" style="width: 100%; padding: 16px; background-color: #00C853; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">Select Bolt</button>
+        </div>
+    </div>
+    
+    <!-- Ride Confirmation Overlay -->
+    <div id="ride-confirmation-overlay" class="overlay">
+        <div class="overlay-header">
+            <button id="back-to-riders-button" class="back-button-small">←</button>
+            <h3 class="overlay-title">Confirm Your Ride</h3>
+        </div>
+        
+        <div style="padding: 20px;">
+            <!-- Map Preview -->
+            <div style="height: 200px; background-color: #F5F5F5; border-radius: 12px; margin-bottom: 20px; position: relative; overflow: hidden;">
+                <img src="https://maps.googleapis.com/maps/api/staticmap?center=5.8142,-0.4913&zoom=14&size=600x400&markers=color:green%7Clabel:A%7C5.8142,-0.4913&markers=color:blue%7Clabel:B%7C5.8160,-0.4930&path=color:0x4285F4|weight:5|5.8142,-0.4913|5.8160,-0.4930&key=YOUR_API_KEY" alt="Map" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            
+            <!-- Ride Details -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Ride Details</h4>
+                
+                <div style="display: flex; margin-bottom: 15px;">
+                    <div style="margin-right: 15px; display: flex; flex-direction: column; align-items: center;">
+                        <div style="width: 12px; height: 12px; background-color: #00C853; border-radius: 50%;"></div>
+                        <div style="width: 2px; height: 30px; background-color: #E0E0E0; margin: 5px 0;"></div>
+                        <div style="width: 12px; height: 12px; background-color: #00C853; border-radius: 50%;"></div>
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <div style="margin-bottom: 20px;">
+                            <div id="confirmation-pickup" style="font-weight: 500; margin-bottom: 3px;">Adeiso Market</div>
+                            <div style="font-size: 0.8rem; color: #757575;">Pickup point</div>
+                        </div>
+                        
+                        <div>
+                            <div id="confirmation-destination" style="font-weight: 500; margin-bottom: 3px;">Adeiso Hospital</div>
+                            <div style="font-size: 0.8rem; color: #757575;">Destination</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 15px; border-radius: 12px; background-color: #F5F5F5;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Distance</div>
+                        <div id="confirmation-distance" style="font-weight: 500;">2.5 km</div>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Duration</div>
+                        <div id="confirmation-duration" style="font-weight: 500;">9 min</div>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Price</div>
+                        <div id="confirmation-price" style="font-weight: 500;">GH₵ 27</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rider Info -->
+            <div style="padding: 20px; border-radius: 12px; background-color: #F5F5F5; margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Your Rider</h4>
+                <div style="display: flex; align-items: center;">
+                    <img class="rider-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rider" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                    <div style="flex: 1;">
+                        <div class="rider-name" style="font-weight: 600; margin-bottom: 3px;">John Doe</div>
+                        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                            <span style="color: #FFB400; margin-right: 5px;">★</span>
+                            <span class="rider-rating" style="font-size: 0.9rem;">4.8</span>
+                            <span class="rider-bike" style="font-size: 0.8rem; color: #757575; margin-left: 10px;">Honda CG 125</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #757575;">Arrives in <span class="rider-arrival-time">5</span> min</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Payment Method</h4>
+                <div style="display: flex; align-items: center; padding: 15px; border-radius: 12px; background-color: #F5F5F5;">
+                    <div style="width: 40px; height: 40px; background-color: #E0E0E0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 20px;">💵</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500;">Cash</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Pay with cash</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Buttons -->
+            <div style="display: flex; gap: 10px;">
+                <button id="cancel-ride-button" style="flex: 1; padding: 16px; background-color: #f5f5f5; color: #333; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button id="confirm-ride-button" style="flex: 2; padding: 16px; background-color: #00C853; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">Confirm Ride</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search/Destination Input Overlay -->
+    <div id="search-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: white; z-index: 30; max-width: 500px; margin: 0 auto;">
+        <div style="padding: 15px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center;">
+            <button id="search-back-button" style="background: none; border: none; font-size: 1.5rem; margin-right: 15px; cursor: pointer;">←</button>
+            <div style="flex: 1; position: relative;">
+                <input type="text" id="search-input" placeholder="Search destination" style="width: 100%; padding: 12px 15px; background-color: #F5F5F5; border: none; border-radius: 8px; font-size: 1rem;">
+                <button id="search-clear-button" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.2rem; cursor: pointer; display: none;">×</button>
+            </div>
+            <button id="search-map-button" style="background: none; border: none; margin-left: 10px; padding: 8px 12px; background-color: #F5F5F5; border-radius: 8px; font-size: 0.9rem; cursor: pointer;">Map</button>
+        </div>
+        
+        <div id="search-results" style="height: calc(100% - 70px); overflow-y: auto; padding: 0 20px;">
+            <!-- Search results will be populated here -->
+        </div>
+    </div>
+    
+    <!-- Riders Section (hidden by default) -->
+    <div id="riders-section" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background-color: white; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); max-height: 80vh; overflow-y: auto; z-index: 100; max-width: 500px; margin: 0 auto;">
+        <div class="handle"></div>
+        
+        <div style="padding: 10px 20px 0;">
+            <!-- Route Info Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div>
+                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 5px;">Choose your ride</h3>
+                    <div style="display: flex; align-items: center;">
+                        <span id="ride-time-display" style="font-size: 0.9rem; color: #757575; margin-right: 15px;">9 min</span>
+                        <span id="ride-distance-display" style="font-size: 0.9rem; color: #757575;">2.5 km</span>
+                    </div>
+                </div>
+                <button id="change-route-button" style="background: none; border: none; color: #00C853; font-weight: 500; cursor: pointer;">Change</button>
+            </div>
+            
+            <!-- Ride Options -->
+            <div style="margin-bottom: 20px;">
+                <!-- Bolt Option -->
+                <div class="ride-option active" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer;">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">🏍️</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Bolt</div>
+                        <div style="font-size: 0.8rem; color: #757575;">9 min <span style="margin: 0 5px;">•</span> 4</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 27</div>
+                </div>
+                
+                <!-- Comfort Option -->
+                <div class="ride-option" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer;">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">🚗</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Comfort</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Busy <span style="margin: 0 5px;">•</span> 4</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 31</div>
+                </div>
+                
+                <!-- Economy Option -->
+                <div class="ride-option" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer;">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">🚘</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Economy</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Busy <span style="margin: 0 5px;">•</span> 4</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 24</div>
+                </div>
+                
+                <!-- Send by Bike Option -->
+                <div class="ride-option" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer;">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">🛵</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Send by Bike</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Busy <span style="margin: 0 5px;">•</span> 0</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 17</div>
+                </div>
+                
+                <!-- Send by Car Option -->
+                <div class="ride-option" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer;">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">📦</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Send by Car</div>
+                        <div style="font-size: 0.8rem; color: #757575;">16 min <span style="margin: 0 5px;">•</span> 0</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 49</div>
+                </div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+                    <div style="display: flex; align-items: center;">
+                        <span style="font-size: 20px; margin-right: 10px;">💵</span>
+                        <span style="font-weight: 500;">Cash</span>
+                    </div>
+                    <span style="font-size: 18px;">▼</span>
+                </div>
+            </div>
+            
+            <!-- Select Button -->
+            <button id="select-ride-button" style="width: 100%; padding: 16px; background-color: #00C853; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 20px;">Select Bolt</button>
+        </div>
+    </div>
+    
+    <!-- Ride Confirmation Overlay (hidden by default) -->
+    <div id="ride-confirmation-overlay" class="overlay">
+        <div class="overlay-header" style="padding: 15px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center;">
+            <button id="back-to-riders-button" class="back-button" style="background: none; border: none; font-size: 1.5rem; margin-right: 15px; cursor: pointer;">←</button>
+            <h3 class="overlay-title" style="font-size: 1.2rem; font-weight: 600; margin: 0;">Confirm Your Ride</h3>
+        </div>
+        
+        <div style="padding: 20px;">
+            <!-- Map Preview -->
+            <div style="height: 200px; background-color: #F5F5F5; border-radius: 12px; margin-bottom: 20px; position: relative; overflow: hidden;">
+                <div id="confirmation-map" style="height: 100%; width: 100%;"></div>
+            </div>
+            
+            <!-- Ride Details -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Ride Details</h4>
+                
+                <div style="display: flex; margin-bottom: 15px;">
+                    <div style="margin-right: 15px; display: flex; flex-direction: column; align-items: center;">
+                        <div style="width: 12px; height: 12px; background-color: #00C853; border-radius: 50%;"></div>
+                        <div style="width: 2px; height: 30px; background-color: #E0E0E0; margin: 5px 0;"></div>
+                        <div style="width: 12px; height: 12px; background-color: #00C853; border-radius: 50%;"></div>
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-weight: 500; margin-bottom: 3px;" id="confirmation-pickup">Your current location</div>
+                            <div style="font-size: 0.8rem; color: #757575;">Pickup point</div>
+                        </div>
+                        
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 3px;" id="confirmation-destination">Adeiso Market</div>
+                            <div style="font-size: 0.8rem; color: #757575;">Destination</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 15px; border-radius: 12px; background-color: #F5F5F5;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Distance</div>
+                        <div style="font-weight: 500;" id="confirmation-distance">2.5 km</div>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Duration</div>
+                        <div style="font-weight: 500;" id="confirmation-duration">9 min</div>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Price</div>
+                        <div style="font-weight: 500;" id="confirmation-price">GH₵ 27</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rider Info -->
+            <div id="selected-rider-info" style="padding: 20px; border-radius: 12px; background-color: #F5F5F5; margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Your Rider</h4>
+                <div style="display: flex; align-items: center;">
+                    <img id="confirmation-rider-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rider" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                    <div style="flex: 1;">
+                        <div id="confirmation-rider-name" style="font-weight: 600; margin-bottom: 3px;">John Doe</div>
+                        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                            <span style="color: #FFB400; margin-right: 5px;">★</span>
+                            <span id="confirmation-rider-rating" style="font-size: 0.9rem;">4.8</span>
+                            <span id="confirmation-rider-bike" style="font-size: 0.8rem; color: #757575; margin-left: 10px;">Honda CG 125</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #757575;">Arrives in 5 min</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Payment Method</h4>
+                <div style="display: flex; align-items: center; padding: 15px; border-radius: 12px; background-color: #F5F5F5;">
+                    <div style="width: 40px; height: 40px; background-color: #E0E0E0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 20px;">💵</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500;">Cash</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Pay with cash</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="padding: 15px 20px 25px; border-top: 1px solid #F0F0F0;">
+            <button id="confirm-ride-button" style="width: 100%; padding: 16px; background-color: #00C853; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">Confirm Ride</button>
+        </div>
+    </div>
+    
+    <!-- Ride Status Overlay (hidden by default) -->
+    <div id="ride-status-overlay" class="overlay">
+        <!-- Status Header -->
+        <div class="overlay-header" style="padding: 15px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center; justify-content: center; position: relative;">
+            <h3 class="overlay-title" style="font-size: 1.2rem; font-weight: 600; margin: 0;">Your Ride</h3>
+            <button id="close-status-button" style="position: absolute; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer;">×</button>
+        </div>
+        
+        <!-- Ride Status Map -->
+        <div id="status-map" style="height: 250px; background-color: #F5F5F5; position: relative;">
+            <!-- Live map will be shown here -->
+            
+            <!-- Status Badge -->
+            <div id="ride-status-badge" style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background-color: #00C853; color: white; border-radius: 20px; padding: 8px 15px; font-weight: 500; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                Rider is on the way
+            </div>
+            
+            <!-- ETA Display -->
+            <div style="position: absolute; bottom: 15px; right: 15px; background-color: white; border-radius: 8px; padding: 8px 12px; font-weight: 500; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                <span id="status-eta">Arriving in 5 min</span>
+            </div>
+        </div>
+        
+        <!-- Ride Progress -->
+        <div style="padding: 20px; border-bottom: 1px solid #F0F0F0;">
+            <!-- Progress Bar -->
+            <div style="height: 4px; background-color: #F0F0F0; border-radius: 2px; margin-bottom: 15px; position: relative;">
+                <div id="ride-progress-bar" style="position: absolute; left: 0; top: 0; height: 100%; background-color: #00C853; border-radius: 2px; width: 25%;"></div>
+            </div>
+            
+            <!-- Status Message -->
+            <div id="ride-status-message" style="font-weight: 500; font-size: 1.1rem; margin-bottom: 5px;">
+                Rider is on the way to pickup location
+            </div>
+            
+            <!-- ETA Message -->
+            <div style="color: #757575; font-size: 0.9rem;">
+                Estimated arrival: <span id="ride-eta">5 min</span>
+            </div>
+        </div>
+        
+        <!-- Rider Info -->
+        <div style="padding: 20px; border-bottom: 1px solid #F0F0F0;">
+            <div id="active-rider-info" style="display: flex; align-items: center;">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rider" style="width: 60px; height: 60px; border-radius: 50%; margin-right: 15px;">
+                <div>
+                    <div style="font-size: 1.1rem; font-weight: bold;">John Doe</div>
+                    <div style="font-size: 0.9rem; color: #757575;">Honda CG 125 • 4.8 ★</div>
+                </div>
+            </div>
+            
+            <!-- Contact Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button style="flex: 1; padding: 12px; border: none; background-color: #F5F5F5; color: #212121; border-radius: 8px; font-weight: 500; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 18px; margin-right: 8px;">📞</span> Call
+                </button>
+                <button style="flex: 1; padding: 12px; border: none; background-color: #F5F5F5; color: #212121; border-radius: 8px; font-weight: 500; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 18px; margin-right: 8px;">💬</span> Message
+                </button>
+            </div>
+        </div>
+        
+        <!-- Trip Info -->
+        <div style="padding: 20px; border-bottom: 1px solid #F0F0F0;">
+            <div style="display: flex; margin-bottom: 20px;">
+                <div style="margin-right: 15px; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 12px; height: 12px; background-color: #00C853; border-radius: 50%;"></div>
+                    <div style="width: 2px; height: 30px; background-color: #E0E0E0; margin: 5px 0;"></div>
+                    <div style="width: 12px; height: 12px; background-color: #00C853; border-radius: 50%;"></div>
+                </div>
+                
+                <div style="flex: 1;">
+                    <div style="margin-bottom: 20px;">
+                        <div id="status-pickup" style="font-weight: 500; margin-bottom: 3px;">Your current location</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Pickup point</div>
+                    </div>
+                    
+                    <div>
+                        <div id="status-destination" style="font-weight: 500; margin-bottom: 3px;">Adeiso Market</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Destination</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div style="padding: 20px;">
+            <button id="complete-ride-button" style="width: 100%; padding: 16px; background-color: #00C853; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 15px; display: none;">
+                Complete Ride
+            </button>
+            
+            <button id="cancel-ride-button" style="width: 100%; padding: 16px; background-color: #F5F5F5; color: #212121; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">
+                Cancel Ride
+            </button>
+        </div>
+    </div>
+    
+    <!-- Ride Rating Overlay (hidden by default) -->
+    <div id="ride-rating-overlay" class="overlay">
+        <div class="overlay-header" style="padding: 15px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center; justify-content: center;">
+            <h3 class="overlay-title" style="font-size: 1.2rem; font-weight: 600; margin: 0;">Rate Your Ride</h3>
+        </div>
+        
+        <div style="padding: 30px 20px; text-align: center;">
+            <img id="rating-rider-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rider" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px;">
+            
+            <div id="rating-rider-name" style="font-size: 1.2rem; font-weight: 600; margin-bottom: 5px;">John Doe</div>
+            
+            <div style="font-size: 0.9rem; color: #757575; margin-bottom: 30px;">
+                How was your ride with <span id="rating-rider-first-name">John</span>?
+            </div>
+            
+            <!-- Star Rating -->
+            <div class="star-rating" style="font-size: 2.5rem; margin-bottom: 30px;">
+                <span class="star" data-rating="1" style="color: #E0E0E0; cursor: pointer;">★</span>
+                <span class="star" data-rating="2" style="color: #E0E0E0; cursor: pointer;">★</span>
+                <span class="star" data-rating="3" style="color: #E0E0E0; cursor: pointer;">★</span>
+                <span class="star" data-rating="4" style="color: #E0E0E0; cursor: pointer;">★</span>
+                <span class="star" data-rating="5" style="color: #E0E0E0; cursor: pointer;">★</span>
+            </div>
+            
+            <!-- Comment Input -->
+            <div style="margin-bottom: 30px;">
+                <textarea id="rating-comment" placeholder="Leave a comment (optional)" style="width: 100%; height: 100px; padding: 15px; border: 1px solid #E0E0E0; border-radius: 8px; resize: none; font-size: 1rem;"></textarea>
+            </div>
+            
+            <!-- Submit Button -->
+            <button id="submit-rating-button" style="width: 100%; padding: 16px; background-color: #00C853; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">
+                Submit Rating
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Map variables
+        let map;
+        let routeControl;
+        let pickupMarker;
+        let destinationMarker;
+        let pickupCoords;
+        let destinationCoords;
+        let isSelectingOnMap = false;
+        let currentSelectionType = '';
+        let selectedRider = null;
+        let rideStatus = 'pending';
+        let currentRating = 0;
+        
+        // Sample coordinates for Adeiso, Ghana
+        const adeisoCoordinates = [5.8142, -0.4913];
+        
+        // Sample location coordinates (in a real app, these would come from a database)
+        const locationCoordinates = {
+            'Adeiso Market': [5.8142, -0.4913],
+            'Adeiso Hospital': [5.8160, -0.4930],
+            'Adeiso School': [5.8120, -0.4890]
+        };
+        
+        // Initialize map
+        initMap();
+        
+        // Initialize form controls
+        initFormControls();
+        
+        // Check for active ride
+        checkActiveRide();
+    });
+    
+    // Initialize the map
+    function initMap() {
+        // Create map centered on Adeiso
+        map = L.map('map').setView(adeisoCoordinates, 14);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Initialize Leaflet Routing Machine for better route visualization
+        routeControl = L.Routing.control({
+            waypoints: [],
+            routeWhileDragging: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            lineOptions: {
+                styles: [{
+                    color: '#4285F4',
+                    opacity: 0.8,
+                    weight: 6
+                }]
+            },
+            createMarker: function() { return null; }, // Don't create default markers
+            show: false // Don't show the instruction panel
+        }).addTo(map);
+        
+        // Add click event to map for selecting locations
+        map.on('click', function(e) {
+            if (isSelectingOnMap) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                
+                if (currentSelectionType === 'pickup') {
+                    // Set pickup coordinates
+                    pickupCoords = [lat, lng];
+                    
+                    // Add marker for pickup location
+                    if (pickupMarker) {
+                        map.removeLayer(pickupMarker);
+                    }
+                    
+                    const pickupIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="display: flex; align-items: center; justify-content: center; background-color: #00C853; width: 36px; height: 36px; border-radius: 50%; border: 2px solid white; color: white; font-weight: bold; font-size: 14px;">A</div>`,
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    });
+                    
+                    pickupMarker = L.marker(pickupCoords, { icon: pickupIcon }).addTo(map);
+                    
+                    // Get address using reverse geocoding
+                    reverseGeocode(lat, lng, function(address) {
+                        document.getElementById('pickup-display').textContent = address || 'Custom Location';
+                        document.getElementById('pickup-display').style.color = '#000';
+                    });
+                    
+                    // If destination is also set, draw route
+                    if (destinationCoords) {
+                        drawRoute(pickupCoords, destinationCoords);
+                    }
+                } else if (currentSelectionType === 'destination') {
+                    // Set destination coordinates
+                    destinationCoords = [lat, lng];
+                    
+                    // Add marker for destination location
+                    if (destinationMarker) {
+                        map.removeLayer(destinationMarker);
+                    }
+                    
+                    const destIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="display: flex; align-items: center; justify-content: center; background-color: #4285F4; width: 36px; height: 36px; border-radius: 50%; border: 2px solid white; color: white; font-weight: bold; font-size: 14px;">B</div>`,
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    });
+                    
+                    destinationMarker = L.marker(destinationCoords, { icon: destIcon }).addTo(map);
+                    
+                    // Get address using reverse geocoding
+                    reverseGeocode(lat, lng, function(address) {
+                        document.getElementById('destination-display').textContent = address || 'Custom Location';
+                        document.getElementById('destination-display').style.color = '#000';
+                    });
+                    
+                    // If pickup is also set, draw route
+                    if (pickupCoords) {
+                        drawRoute(pickupCoords, destinationCoords);
+                    }
+                }
+                
+                // Hide map selection indicator
+                document.getElementById('map-selection-indicator').style.display = 'none';
+                isSelectingOnMap = false;
+                currentSelectionType = '';
+                
+                // Update search button state
+                updateSearchButtonState();
+            }
+        });
+        
+        // Add current location button functionality
+        document.getElementById('current-location-button').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        
+                        // Set map view to user location
+                        map.setView([userLat, userLng], 15);
+                        
+                        // Add marker for user location
+                        if (pickupMarker) {
+                            map.removeLayer(pickupMarker);
+                        }
+                        
+                        pickupCoords = [userLat, userLng];
+                        
+                        const pickupIcon = L.divIcon({
+                            className: 'custom-marker',
+                            html: `<div style="display: flex; align-items: center; justify-content: center; background-color: #00C853; width: 36px; height: 36px; border-radius: 50%; border: 2px solid white; color: white; font-weight: bold; font-size: 14px;">A</div>`,
+                            iconSize: [36, 36],
+                            iconAnchor: [18, 18]
+                        });
+                        
+                        pickupMarker = L.marker(pickupCoords, { icon: pickupIcon }).addTo(map);
+                        
+                        // Update pickup display
+                        document.getElementById('pickup-display').textContent = 'My Current Location';
+                        document.getElementById('pickup-display').style.color = '#000';
+                        
+                        // If destination is also set, draw route
+                        if (destinationCoords) {
+                            drawRoute(pickupCoords, destinationCoords);
+                        }
+                        
+                        // Update search button state
+                        updateSearchButtonState();
+                    },
+                    function(error) {
+                        console.error('Error getting location:', error);
+                        alert('Could not get your location. Please select manually.');
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser');
+            }
+        });
+        
+        // Add back button functionality
+        document.getElementById('back-button').addEventListener('click', function() {
+            window.history.back();
+        });
+    }
+    
+    // Draw route between two points using Leaflet Routing Machine
+    function drawRoute(start, end) {
+        // Clear any existing route
+        if (routeControl) {
+            routeControl.setWaypoints([]);
+        }
+        
+        // Make sure we have valid LatLng objects
+        const startLatLng = (start instanceof L.LatLng) ? start : L.latLng(start[0], start[1]);
+        const endLatLng = (end instanceof L.LatLng) ? end : L.latLng(end[0], end[1]);
+        
+        // Set the waypoints for the route
+        routeControl.setWaypoints([startLatLng, endLatLng]);
+        
+        // Show arrival time badge
+        const arrivalTime = getEstimatedArrivalTime();
+        document.getElementById('arrival-time-badge').textContent = 'Arrive by ' + arrivalTime;
+        document.getElementById('arrival-time-badge').style.display = 'block';
+        
+        // Show time badge
+        const minutes = Math.floor(Math.random() * 5) + 7; // 7-12 minutes
+        document.getElementById('time-badge').innerHTML = `<div style="font-size: 1.2rem;">${minutes}</div><div style="font-size: 0.7rem;">min</div>`;
+        document.getElementById('time-badge').style.display = 'block';
+        
+        // Calculate distance
+        const distance = calculateDistance(
+            startLatLng.lat, startLatLng.lng,
+            endLatLng.lat, endLatLng.lng
+        );
+        
+        // Update ride details
+        document.getElementById('ride-time-display').textContent = `${minutes} min`;
+        document.getElementById('ride-distance-display').textContent = `${distance.toFixed(1)} km`;
+        document.getElementById('confirmation-distance').textContent = `${distance.toFixed(1)} km`;
+        document.getElementById('confirmation-duration').textContent = `${minutes} min`;
+        
+        return new Promise((resolve) => {
+            // Fit map to show the entire route with padding
+            setTimeout(() => {
+                try {
+                    map.fitBounds(L.latLngBounds([startLatLng, endLatLng]), { padding: [50, 50] });
+                } catch (e) {
+                    console.error('Error fitting bounds:', e);
+                }
+                resolve();
+            }, 1000);
+        });
+    }
+    
+    // Reverse geocode coordinates to address
+    function reverseGeocode(lat, lng, callback) {
+        // Use Nominatim for reverse geocoding
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    // Extract a shorter version of the address
+                    const address = data.address;
+                    let formattedAddress = '';
+                    
+                    if (address.road) {
+                        formattedAddress += address.road;
+                        if (address.house_number) {
+                            formattedAddress += ' ' + address.house_number;
+                        }
+                    } else if (address.pedestrian) {
+                        formattedAddress += address.pedestrian;
+                    } else if (address.neighbourhood) {
+                        formattedAddress += address.neighbourhood;
+                    }
+                    
+                    if (address.suburb) {
+                        if (formattedAddress) formattedAddress += ', ';
+                        formattedAddress += address.suburb;
+                    } else if (address.city_district) {
+                        if (formattedAddress) formattedAddress += ', ';
+                        formattedAddress += address.city_district;
+                    }
+                    
+                    if (address.city) {
+                        if (formattedAddress) formattedAddress += ', ';
+                        formattedAddress += address.city;
+                    } else if (address.town) {
+                        if (formattedAddress) formattedAddress += ', ';
+                        formattedAddress += address.town;
+                    } else if (address.village) {
+                        if (formattedAddress) formattedAddress += ', ';
+                        formattedAddress += address.village;
+                    }
+                    
+                    callback(formattedAddress || data.display_name);
+                } else {
+                    callback('Unknown location');
+                }
+            })
+            .catch(error => {
+                console.error('Error with reverse geocoding:', error);
+                callback('Unknown location');
+            });
+    }
+    
+    // Get estimated arrival time
+    function getEstimatedArrivalTime() {
+        const now = new Date();
+        const minutes = Math.floor(Math.random() * 15) + 5; // 5-20 minutes
+        now.setMinutes(now.getMinutes() + minutes);
+        
+        // Format time as HH:MM AM/PM
+        return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+    
+    // Calculate distance between two coordinates (Haversine formula)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radius of the earth in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c; // Distance in km
+    }
+    
+    // Initialize form controls
+    function initFormControls() {
+        // Pickup map button
+        document.getElementById('pickup-map-button').addEventListener('click', function() {
+            startMapSelection('pickup');
+        });
+        
+        // Destination map button
+        document.getElementById('destination-map-button').addEventListener('click', function() {
+            startMapSelection('destination');
+        });
+        
+        // Cancel selection button
+        document.getElementById('cancel-selection-button').addEventListener('click', function() {
+            document.getElementById('map-selection-indicator').style.display = 'none';
+            isSelectingOnMap = false;
+            currentSelectionType = '';
+        });
+        
+        // Popular destinations
+        document.querySelectorAll('.popular-destination').forEach(function(element) {
+            element.addEventListener('click', function() {
+                const location = this.getAttribute('data-location');
+                const coords = locationCoordinates[location];
+                
+                if (coords) {
+                    // Set destination
+                    destinationCoords = coords;
+                    
+                    // Update destination display
+                    document.getElementById('destination-display').textContent = location;
+                    document.getElementById('destination-display').style.color = '#000';
+                    
+                    // Add marker for destination location
+                    if (destinationMarker) {
+                        map.removeLayer(destinationMarker);
+                    }
+                    
+                    const destIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="display: flex; align-items: center; justify-content: center; background-color: #4285F4; width: 36px; height: 36px; border-radius: 50%; border: 2px solid white; color: white; font-weight: bold; font-size: 14px;">B</div>`,
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    });
+                    
+                    destinationMarker = L.marker(destinationCoords, { icon: destIcon }).addTo(map);
+                    
+                    // If pickup is also set, draw route
+                    if (pickupCoords) {
+                        drawRoute(pickupCoords, destinationCoords);
+                    }
+                    
+                    // Update search button state
+                    updateSearchButtonState();
+                }
+            });
+        });
+        
+        // Search button
+        document.getElementById('search-button').addEventListener('click', function() {
+            if (!this.disabled) {
+                searchRiders();
+            }
+        });
+        
+        // Ride options selection
+        document.querySelectorAll('.ride-option').forEach(function(option) {
+            option.addEventListener('click', function() {
+                // Remove active class from all options
+                document.querySelectorAll('.ride-option').forEach(opt => opt.classList.remove('active'));
+                
+                // Add active class to selected option
+                this.classList.add('active');
+                
+                // Update select button text
+                const rideType = this.querySelector('div:nth-child(2) > div:first-child').textContent;
+                const price = this.querySelector('div:last-child').textContent;
+                document.getElementById('select-ride-button').textContent = `Select ${rideType}`;
+                document.getElementById('confirmation-price').textContent = price;
+            });
+        });
+        
+        // Select ride button
+        document.getElementById('select-ride-button').addEventListener('click', function() {
+            showRideConfirmation();
+        });
+        
+        // Back to riders button
+        document.getElementById('back-to-riders-button').addEventListener('click', function() {
+            document.getElementById('ride-confirmation-overlay').style.display = 'none';
+            document.getElementById('riders-section').style.display = 'block';
+        });
+        
+        // Confirm ride button
+        document.getElementById('confirm-ride-button').addEventListener('click', function() {
+            confirmRide();
+        });
+        
+        // Change route button
+        document.getElementById('change-route-button').addEventListener('click', function() {
+            document.getElementById('riders-section').style.display = 'none';
+            document.getElementById('booking-form').style.display = 'block';
+        });
+        
+        // Star rating functionality
+        document.querySelectorAll('.star').forEach(function(star) {
+            star.addEventListener('mouseover', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                highlightStars(rating);
+            });
+            
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                currentRating = rating;
+            });
+        });
+        
+        document.querySelector('.star-rating').addEventListener('mouseout', function() {
+            highlightStars(currentRating);
+        });
+        
+        // Submit rating button
+        document.getElementById('submit-rating-button').addEventListener('click', function() {
+            submitRating();
+        });
+        
+        // Complete ride button
+        document.getElementById('complete-ride-button').addEventListener('click', function() {
+            completeRide();
+        });
+        
+        // Cancel ride button
+        document.getElementById('cancel-ride-button').addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel this ride?')) {
+                cancelRide();
+            }
+        });
+        
+        // Close status button
+        document.getElementById('close-status-button').addEventListener('click', function() {
+            document.getElementById('ride-status-overlay').style.display = 'none';
+        });
+        
+        // Update search button state
+        updateSearchButtonState();
+    }
+    
+    // Start map selection mode
+    function startMapSelection(type) {
+        isSelectingOnMap = true;
+        currentSelectionType = type;
+        
+        // Update selection indicator
+        document.getElementById('selection-type').textContent = type;
+        document.getElementById('map-selection-indicator').style.display = 'block';
+    }
+    
+    // Update search button state
+    function updateSearchButtonState() {
+        const searchButton = document.getElementById('search-button');
+        
+        if (pickupCoords && destinationCoords) {
+            searchButton.disabled = false;
+            searchButton.style.opacity = '1';
+        } else {
+            searchButton.disabled = true;
+            searchButton.style.opacity = '0.7';
+        }
+    }
+    
+    // Search for available riders
+    function searchRiders() {
+        // Hide booking form
+        document.getElementById('booking-form').style.display = 'none';
+        
+        // Show riders section
+        document.getElementById('riders-section').style.display = 'block';
+        
+        // In a real app, we would fetch riders from an API
+        // For this demo, we'll just show the pre-defined ride options
+    }
+    
+    // Show ride confirmation overlay
+    function showRideConfirmation() {
+        // Hide riders section
+        document.getElementById('riders-section').style.display = 'none';
+        
+        // Update confirmation details
+        document.getElementById('confirmation-pickup').textContent = document.getElementById('pickup-display').textContent;
+        document.getElementById('confirmation-destination').textContent = document.getElementById('destination-display').textContent;
+        
+        // Initialize confirmation map
+        const confirmationMap = L.map('confirmation-map').setView(adeisoCoordinates, 14);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(confirmationMap);
+        
+        // Add route to confirmation map
+        if (pickupCoords && destinationCoords) {
+            const startLatLng = (pickupCoords instanceof L.LatLng) ? pickupCoords : L.latLng(pickupCoords[0], pickupCoords[1]);
+            const endLatLng = (destinationCoords instanceof L.LatLng) ? destinationCoords : L.latLng(destinationCoords[0], destinationCoords[1]);
+            
+            const routingControl = L.Routing.control({
+                waypoints: [startLatLng, endLatLng],
+                routeWhileDragging: false,
+                addWaypoints: false,
+                draggableWaypoints: false,
+                lineOptions: {
+                    styles: [{
+                        color: '#4285F4',
+                        opacity: 0.8,
+                        weight: 6
+                    }]
+                },
+                createMarker: function() { return null; },
+                show: false
+            }).addTo(confirmationMap);
+            
+            // Fit bounds to show the entire route
+            setTimeout(() => {
+                confirmationMap.fitBounds(L.latLngBounds([startLatLng, endLatLng]), { padding: [20, 20] });
+            }, 1000);
+        }
+        
+        // Show confirmation overlay
+        document.getElementById('ride-confirmation-overlay').style.display = 'block';
+    }
+    
+    // Confirm ride and redirect to homepage
+    function confirmRide() {
+        // Create ride object
+        const ride = {
+            pickup: document.getElementById('pickup-display').textContent,
+            destination: document.getElementById('destination-display').textContent,
+            price: document.getElementById('confirmation-price').textContent,
+            estimatedArrival: getEstimatedArrivalTime(),
+            status: 'confirmed',
+            rider: {
+                name: document.getElementById('confirmation-rider-name').textContent,
+                avatar: document.getElementById('confirmation-rider-avatar').src,
+                bike: document.getElementById('confirmation-rider-bike').textContent,
+                rating: document.getElementById('confirmation-rider-rating').textContent,
+                price: document.getElementById('confirmation-price').textContent
+            },
+            distance: document.getElementById('confirmation-distance').textContent,
+            duration: document.getElementById('confirmation-duration').textContent,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Store ride in session storage for homepage to access
+        sessionStorage.setItem('activeRide', JSON.stringify(ride));
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '50%';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translate(-50%, -50%)';
+        successMessage.style.backgroundColor = '#00C853';
+        successMessage.style.color = 'white';
+        successMessage.style.padding = '20px';
+        successMessage.style.borderRadius = '12px';
+        successMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+        successMessage.style.zIndex = '1000';
+        successMessage.style.textAlign = 'center';
+        successMessage.innerHTML = '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Ride Confirmed!</div><div>Your rider is on the way</div>';
+        
+        document.body.appendChild(successMessage);
+        
+        // Redirect to homepage after 2 seconds
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 2000);
+    }
+    
+    // Highlight rating stars
+    function highlightStars(rating) {
+        document.querySelectorAll('.star').forEach(function(star, index) {
+            if (index < rating) {
+                star.style.color = '#FFB400';
+            } else {
+                star.style.color = '#E0E0E0';
+            }
+        });
+    }
+    
+    // Submit rating
+    function submitRating() {
+        if (currentRating === 0) {
+            alert('Please select a rating');
+            return;
+        }
+        
+        // In a real app, we would send the rating to an API
+        // For this demo, we'll just reset the ride state
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '50%';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translate(-50%, -50%)';
+        successMessage.style.backgroundColor = '#00C853';
+        successMessage.style.color = 'white';
+        successMessage.style.padding = '20px';
+        successMessage.style.borderRadius = '12px';
+        successMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+        successMessage.style.zIndex = '1000';
+        successMessage.style.textAlign = 'center';
+        successMessage.innerHTML = '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Thank You!</div><div>Your rating has been submitted</div>';
+        
+        document.body.appendChild(successMessage);
+        
+        // Hide rating overlay
+        document.getElementById('ride-rating-overlay').style.display = 'none';
+        
+        // Remove active ride from session storage
+        sessionStorage.removeItem('activeRide');
+        
+        // Redirect to homepage after 2 seconds
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 2000);
+    }
+    
+    // Complete ride
+    function completeRide() {
+        // Update ride status
+        rideStatus = 'completed';
+        
+        // Show rating overlay
+        document.getElementById('ride-status-overlay').style.display = 'none';
+        document.getElementById('ride-rating-overlay').style.display = 'block';
+    }
+    
+    // Cancel ride
+    function cancelRide() {
+        // Remove active ride from session storage
+        sessionStorage.removeItem('activeRide');
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '50%';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translate(-50%, -50%)';
+        successMessage.style.backgroundColor = '#00C853';
+        successMessage.style.color = 'white';
+        successMessage.style.padding = '20px';
+        successMessage.style.borderRadius = '12px';
+        successMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+        successMessage.style.zIndex = '1000';
+        successMessage.style.textAlign = 'center';
+        successMessage.innerHTML = '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Ride Cancelled</div><div>Your ride has been cancelled</div>';
+        
+        document.body.appendChild(successMessage);
+        
+        // Redirect to homepage after 2 seconds
+        setTimeout(function() {
+            window.location.href = '/';
+        }, 2000);
+    }
+    
+    // Check for active ride
+    function checkActiveRide() {
+        // Check if there's an active ride in session storage
+        const activeRideData = sessionStorage.getItem('activeRide');
+        
+        if (activeRideData) {
+            const ride = JSON.parse(activeRideData);
+            
+            // Update ride status overlay with active ride details
+            document.getElementById('status-pickup').textContent = ride.pickup;
+            document.getElementById('status-destination').textContent = ride.destination;
+            document.getElementById('ride-status-message').textContent = 'Ride in progress';
+            document.getElementById('ride-progress-bar').style.width = '75%';
+            document.getElementById('ride-status-badge').textContent = 'Ride in progress';
+            document.getElementById('status-eta').textContent = `Arriving by ${ride.estimatedArrival}`;
+            document.getElementById('ride-eta').textContent = ride.duration;
+            
+            // Update rider info
+            document.getElementById('active-rider-info').innerHTML = `
+                <img src="${ride.rider.avatar}" alt="Rider" style="width: 60px; height: 60px; border-radius: 50%; margin-right: 15px;">
+                <div>
+                    <div style="font-size: 1.1rem; font-weight: bold;">${ride.rider.name}</div>
+                    <div style="font-size: 0.9rem; color: #757575;">${ride.rider.bike} • ${ride.rider.rating} ★</div>
+                </div>
+            `;
+            
+            // Show complete ride button
+            document.getElementById('complete-ride-button').style.display = 'block';
+            
+            // Show ride status overlay
+            document.getElementById('ride-status-overlay').style.display = 'block';
+            
+            // Hide booking form
+            document.getElementById('booking-form').style.display = 'none';
+        }
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get DOM elements
+        const searchButton = document.getElementById('search-button');
+        const pickupSelect = document.getElementById('pickup-select');
+        const destinationSelect = document.getElementById('destination-select');
+        const ridersSection = document.getElementById('riders-section');
+        const rideConfirmationOverlay = document.getElementById('ride-confirmation-overlay');
+        const backButton = document.getElementById('back-button');
+        const backToFormButton = document.getElementById('back-to-form-button');
+        const backToRidersButton = document.getElementById('back-to-riders-button');
+        const selectRideButton = document.getElementById('select-ride-button');
+        const confirmRideButton = document.getElementById('confirm-ride-button');
+        const changeRouteButton = document.getElementById('change-route-button');
+        const rideOptions = document.querySelectorAll('.ride-option');
+        
+        // Initialize custom select dropdowns
+        function initCustomDropdowns() {
+            const pickupInput = document.getElementById('pickup-input');
+            const pickupDropdown = document.getElementById('pickup-dropdown');
+            const pickupItems = pickupDropdown.querySelectorAll('.dropdown-item');
+            const pickupSelect = document.getElementById('pickup-select');
+            
+            const destinationInput = document.getElementById('destination-input');
+            const destinationDropdown = document.getElementById('destination-dropdown');
+            const destinationItems = destinationDropdown.querySelectorAll('.dropdown-item');
+            const destinationSelect = document.getElementById('destination-select');
+            
+            // Pickup input handlers
+            pickupInput.addEventListener('focus', function() {
+                pickupDropdown.style.display = 'block';
+            });
+            
+            pickupInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                let hasVisibleItems = false;
+                
+                pickupItems.forEach(function(item) {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        item.style.display = 'block';
+                        hasVisibleItems = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                pickupDropdown.style.display = hasVisibleItems ? 'block' : 'none';
+            });
+            
+            pickupItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    pickupInput.value = value;
+                    pickupSelect.value = value;
+                    pickupDropdown.style.display = 'none';
+                    updateRouteInfo();
+                });
+            });
+            
+            // Destination input handlers
+            destinationInput.addEventListener('focus', function() {
+                destinationDropdown.style.display = 'block';
+            });
+            
+            destinationInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                let hasVisibleItems = false;
+                
+                destinationItems.forEach(function(item) {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        item.style.display = 'block';
+                        hasVisibleItems = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                destinationDropdown.style.display = hasVisibleItems ? 'block' : 'none';
+            });
+            
+            destinationItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    destinationInput.value = value;
+                    destinationSelect.value = value;
+                    destinationDropdown.style.display = 'none';
+                    updateRouteInfo();
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!pickupInput.contains(event.target) && !pickupDropdown.contains(event.target)) {
+                    pickupDropdown.style.display = 'none';
+                }
+                
+                if (!destinationInput.contains(event.target) && !destinationDropdown.contains(event.target)) {
+                    destinationDropdown.style.display = 'none';
+                }
+            });
+        }
+        
+        // Update route info when pickup or destination changes
+        function updateRouteInfo() {
+            const pickup = document.getElementById('pickup-select').value;
+            const destination = document.getElementById('destination-select').value;
+            
+            if (pickup && destination) {
+                document.getElementById('ride-route').textContent = `${pickup} → ${destination}`;
+                document.getElementById('confirmation-pickup').textContent = pickup;
+                document.getElementById('confirmation-destination').textContent = destination;
+                searchButton.disabled = false;
+            } else {
+                searchButton.disabled = true;
+            }
+        }
+        
+        // Find riders button
+        searchButton.addEventListener('click', function() {
+            if (!this.disabled) {
+                ridersSection.style.display = 'block';
+                updateRouteInfo();
+            }
+        });
+        
+        // Back button
+        backButton.addEventListener('click', function() {
+            window.history.back();
+        });
+        
+        // Back to form button
+        backToFormButton.addEventListener('click', function() {
+            ridersSection.style.display = 'none';
+        });
+        
+        // Back to riders button
+        backToRidersButton.addEventListener('click', function() {
+            rideConfirmationOverlay.style.display = 'none';
+            ridersSection.style.display = 'block';
+        });
+        
+        // Select ride button
+        selectRideButton.addEventListener('click', function() {
+            ridersSection.style.display = 'none';
+            rideConfirmationOverlay.style.display = 'block';
+        });
+        
+        // Change route button
+        changeRouteButton.addEventListener('click', function() {
+            ridersSection.style.display = 'none';
+        });
+        
+        // Ride options selection
+        rideOptions.forEach(function(option) {
+            option.addEventListener('click', function() {
+                // Remove active class from all options
+                rideOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // Add active class to selected option
+                this.classList.add('active');
+                
+                // Get rider details
+                const riderName = this.getAttribute('data-rider-name');
+                const price = this.getAttribute('data-price');
+                const time = this.getAttribute('data-time');
+                const rating = this.getAttribute('data-rating');
+                const bike = this.getAttribute('data-bike');
+                const avatar = this.getAttribute('data-avatar');
+                
+                // Update select button text
+                selectRideButton.textContent = `Select ${riderName}`;
+                
+                // Update confirmation details
+                document.getElementById('confirmation-price').textContent = price;
+                document.getElementById('confirmation-duration').textContent = time;
+                document.getElementById('ride-time').textContent = time;
+                
+                // Update rider info in confirmation
+                document.querySelector('.rider-name').textContent = riderName;
+                document.querySelector('.rider-rating').textContent = rating;
+                document.querySelector('.rider-bike').textContent = bike;
+                document.querySelector('.rider-avatar').src = avatar;
+            });
+        });
+        
+        // Cancel ride button
+        const cancelRideButton = document.getElementById('cancel-ride-button');
+        if (cancelRideButton) {
+            cancelRideButton.addEventListener('click', function() {
+                // Show cancellation message
+                const cancelMessage = document.createElement('div');
+                cancelMessage.style.position = 'fixed';
+                cancelMessage.style.top = '50%';
+                cancelMessage.style.left = '50%';
+                cancelMessage.style.transform = 'translate(-50%, -50%)';
+                cancelMessage.style.backgroundColor = '#FF5252';
+                cancelMessage.style.color = 'white';
+                cancelMessage.style.padding = '20px';
+                cancelMessage.style.borderRadius = '12px';
+                cancelMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                cancelMessage.style.zIndex = '1000';
+                cancelMessage.style.textAlign = 'center';
+                cancelMessage.innerHTML = '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Ride Cancelled</div><div>Your ride has been cancelled</div>';
+                
+                document.body.appendChild(cancelMessage);
+                
+                // Hide confirmation overlay
+                rideConfirmationOverlay.style.display = 'none';
+                
+                // Remove any active ride from session storage
+                sessionStorage.removeItem('activeRide');
+                
+                // Redirect to booking form after 2 seconds
+                setTimeout(function() {
+                    window.location.reload();
+                }, 2000);
+            });
+        }
+        
+        // Confirm ride button
+        confirmRideButton.addEventListener('click', function() {
+            // Get ride details
+            const pickup = pickupSelect.value;
+            const destination = destinationSelect.value;
+            const price = document.getElementById('confirmation-price').textContent;
+            const duration = document.getElementById('confirmation-duration').textContent;
+            const distance = document.getElementById('confirmation-distance').textContent;
+            
+            // Get selected rider details
+            const selectedRider = document.querySelector('.ride-option.active');
+            const riderName = selectedRider.getAttribute('data-rider-name');
+            const riderAvatar = selectedRider.getAttribute('data-avatar');
+            const riderBike = selectedRider.getAttribute('data-bike');
+            const riderRating = selectedRider.getAttribute('data-rating');
+            
+            // Get payment method
+            const paymentMethod = document.querySelector('.payment-option.active') ? 
+                document.querySelector('.payment-option.active').querySelector('div:first-child > div:nth-child(2) > div:first-child').textContent : 'Cash';
+            
+            // Create ride object
+            const ride = {
+                pickup: pickup,
+                destination: destination,
+                price: price,
+                estimatedArrival: getEstimatedArrivalTime(),
+                status: 'confirmed',
+                rider: {
+                    name: riderName,
+                    avatar: riderAvatar,
+                    bike: riderBike,
+                    rating: riderRating,
+                    price: price
+                },
+                distance: distance,
+                duration: duration,
+                paymentMethod: paymentMethod,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Store ride in session storage for homepage to access
+            sessionStorage.setItem('activeRide', JSON.stringify(ride));
+            
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.style.position = 'fixed';
+            successMessage.style.top = '50%';
+            successMessage.style.left = '50%';
+            successMessage.style.transform = 'translate(-50%, -50%)';
+            successMessage.style.backgroundColor = '#00C853';
+            successMessage.style.color = 'white';
+            successMessage.style.padding = '20px';
+            successMessage.style.borderRadius = '12px';
+            successMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            successMessage.style.zIndex = '1000';
+            successMessage.style.textAlign = 'center';
+            successMessage.innerHTML = '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Ride Confirmed!</div><div>Your rider is on the way</div>';
+            
+            document.body.appendChild(successMessage);
+            
+            // Hide confirmation overlay
+            rideConfirmationOverlay.style.display = 'none';
+            
+            // Immediately redirect to homepage
+            window.location.href = '/';
+        });
+        
+        // Get estimated arrival time
+        function getEstimatedArrivalTime() {
+            const now = new Date();
+            const minutes = Math.floor(Math.random() * 15) + 5; // 5-20 minutes
+            now.setMinutes(now.getMinutes() + minutes);
+            
+            // Format time as HH:MM AM/PM
+            return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+        
+        // Initialize the page
+        initCustomDropdowns();
+        updateRouteInfo();
+        
+        // Handle payment method selection
+        const cashOption = document.getElementById('cash-option');
+        const momoOption = document.getElementById('momo-option');
+        
+        if (cashOption && momoOption) {
+            // Function to safely update payment method elements
+            function updatePaymentElements(icon, name, description) {
+                // Only update if elements exist
+                const paymentIcon = document.getElementById('payment-icon');
+                const paymentMethodName = document.getElementById('payment-method-name');
+                const paymentMethodDescription = document.getElementById('payment-method-description');
+                
+                if (paymentIcon) paymentIcon.textContent = icon;
+                if (paymentMethodName) paymentMethodName.textContent = name;
+                if (paymentMethodDescription) paymentMethodDescription.textContent = description;
+            }
+            
+            cashOption.addEventListener('click', function() {
+                // Update UI
+                cashOption.classList.add('active');
+                cashOption.style.border = '2px solid #00C853';
+                cashOption.querySelector('div:last-child > div').style.backgroundColor = '#00C853';
+                
+                momoOption.classList.remove('active');
+                momoOption.style.border = '2px solid transparent';
+                momoOption.querySelector('div:last-child > div').style.backgroundColor = 'transparent';
+                
+                // Update confirmation overlay
+                updatePaymentElements('💵', 'Cash', 'Pay with cash');
+            });
+            
+            momoOption.addEventListener('click', function() {
+                // Update UI
+                momoOption.classList.add('active');
+                momoOption.style.border = '2px solid #00C853';
+                momoOption.querySelector('div:last-child > div').style.backgroundColor = '#00C853';
+                
+                cashOption.classList.remove('active');
+                cashOption.style.border = '2px solid transparent';
+                cashOption.querySelector('div:last-child > div').style.backgroundColor = 'transparent';
+                
+                // Update confirmation overlay
+                updatePaymentElements('📱', 'Mobile Money', 'Pay with MoMo');
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Cart Header -->
+    <div class="cart-header" style="background-color: white; padding: 15px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <a href="/orders" style="color: #212121; text-decoration: none; margin-right: 15px;">←</a>
+        <h1 style="margin: 0; font-size: 1.2rem;">Your Cart</h1>
+    </div>
+    
+    <!-- Empty Cart Message -->
+    <div id="empty-cart-message" style="display: none; text-align: center; padding: 50px 20px;">
+        <div style="font-size: 3rem; margin-bottom: 20px;">🛒</div>
+        <h2 style="margin-bottom: 10px;">Your cart is empty</h2>
+        <p style="color: #757575; margin-bottom: 20px;">Add items from restaurants and shops</p>
+        <a href="/orders" style="display: inline-block; background-color: #00C853; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Browse Shops</a>
+    </div>
+    
+    <!-- Cart Items -->
+    <div id="cart-items-container" style="padding: 15px 15px 150px;">
+        <!-- Shop section will be dynamically added here -->
+    </div>
+    
+    <!-- Checkout Button (Fixed at bottom) -->
+    <div id="checkout-button" style="position: fixed; bottom: 70px; left: 0; right: 0; background-color: white; padding: 15px; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 100;">
+        <div style="max-width: 500px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div>Subtotal</div>
+                <div id="subtotal-price">GH₵ 0.00</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div>Delivery Fee</div>
+                <div id="delivery-fee">GH₵ 0.00</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold;">
+                <div>Total</div>
+                <div id="total-price">GH₵ 0.00</div>
+            </div>
+            <button id="checkout-btn" style="width: 100%; background-color: #00C853; color: white; border: none; border-radius: 5px; padding: 12px; font-weight: bold; cursor: pointer;">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load cart from session storage
+        const cart = JSON.parse(sessionStorage.getItem('orda_cart') || '[]');
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+        const checkoutButton = document.getElementById('checkout-button');
+        
+        // Check if cart is empty
+        if (cart.length === 0) {
+            emptyCartMessage.style.display = 'block';
+            checkoutButton.style.display = 'none';
+            return;
+        }
+        
+        // Group items by shop
+        const shopItems = {};
+        
+        // Fetch shop data from server
+        fetch('/api/shops')
+            .then(response => response.json())
+            .then(shops => {
+                // Process cart items
+                cart.forEach(item => {
+                    // Find shop for this item
+                    let shopId = null;
+                    let shop = null;
+                    
+                    for (const [id, shopData] of Object.entries(shops)) {
+                        const menuItem = shopData.menu_items.find(menuItem => menuItem.id === item.id);
+                        if (menuItem) {
+                            shopId = id;
+                            shop = shopData;
+                            break;
+                        }
+                    }
+                    
+                    if (shopId && shop) {
+                        if (!shopItems[shopId]) {
+                            shopItems[shopId] = {
+                                shop: shop,
+                                items: []
+                            };
+                        }
+                        
+                        shopItems[shopId].items.push(item);
+                    }
+                });
+                
+                // Render cart items by shop
+                for (const [shopId, data] of Object.entries(shopItems)) {
+                    const shop = data.shop;
+                    const items = data.items;
+                    
+                    // Create shop section
+                    const shopSection = document.createElement('div');
+                    shopSection.className = 'shop-section';
+                    shopSection.style.marginBottom = '20px';
+                    shopSection.style.backgroundColor = 'white';
+                    shopSection.style.borderRadius = '8px';
+                    shopSection.style.overflow = 'hidden';
+                    shopSection.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                    
+                    // Shop header
+                    const shopHeader = document.createElement('div');
+                    shopHeader.style.display = 'flex';
+                    shopHeader.style.alignItems = 'center';
+                    shopHeader.style.padding = '15px';
+                    shopHeader.style.borderBottom = '1px solid #EEEEEE';
+                    
+                    shopHeader.innerHTML = `
+                        <div style="font-size: 1.5rem; margin-right: 10px;">${shop.image}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold;">${shop.name}</div>
+                            <div style="font-size: 0.9rem; color: #757575;">${shop.delivery_time} • ${shop.delivery_fee}</div>
+                        </div>
+                    `;
+                    
+                    shopSection.appendChild(shopHeader);
+                    
+                    // Items list
+                    items.forEach(item => {
+                        const itemElement = document.createElement('div');
+                        itemElement.className = 'cart-item';
+                        itemElement.style.display = 'flex';
+                        itemElement.style.padding = '15px';
+                        itemElement.style.borderBottom = '1px solid #EEEEEE';
+                        
+                        // Format options text
+                        let optionsText = '';
+                        if (item.size) {
+                            optionsText += `Size: ${item.size}`;
+                        }
+                        
+                        if (item.options && item.options.length > 0) {
+                            if (optionsText) optionsText += ', ';
+                            optionsText += item.options.map(opt => opt.name).join(', ');
+                        }
+                        
+                        itemElement.innerHTML = `
+                            <div style="font-size: 1.5rem; margin-right: 10px;">${item.image}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold;">${item.name}</div>
+                                <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">${optionsText}</div>
+                                <div style="font-size: 0.9rem; font-weight: bold;">GH₵ ${item.totalPrice.toFixed(2)}</div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <button class="quantity-button minus" data-item-index="${cart.indexOf(item)}" style="width: 25px; height: 25px; background-color: #F5F5F5; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer;">-</button>
+                                <span style="margin: 0 10px;">${item.quantity}</span>
+                                <button class="quantity-button plus" data-item-index="${cart.indexOf(item)}" style="width: 25px; height: 25px; background-color: #F5F5F5; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer;">+</button>
+                            </div>
+                        `;
+                        
+                        shopSection.appendChild(itemElement);
+                    });
+                    
+                    cartItemsContainer.appendChild(shopSection);
+                }
+                
+                // Add event listeners for quantity buttons
+                const minusButtons = document.querySelectorAll('.quantity-button.minus');
+                const plusButtons = document.querySelectorAll('.quantity-button.plus');
+                
+                minusButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const itemIndex = parseInt(this.getAttribute('data-item-index'));
+                        updateItemQuantity(itemIndex, -1);
+                    });
+                });
+                
+                plusButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const itemIndex = parseInt(this.getAttribute('data-item-index'));
+                        updateItemQuantity(itemIndex, 1);
+                    });
+                });
+                
+                // Calculate and update totals
+                updateCartTotals(shopItems);
+                
+                // Add event listener for checkout button
+                document.getElementById('checkout-btn').addEventListener('click', function() {
+                    // Save cart data for checkout
+                    sessionStorage.setItem('orda_checkout_data', JSON.stringify({
+                        items: cart,
+                        shops: shopItems
+                    }));
+                    
+                    // Redirect to checkout page
+                    window.location.href = '/checkout';
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching shop data:', error);
+                emptyCartMessage.style.display = 'block';
+                emptyCartMessage.innerHTML = `
+                    <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
+                    <h2 style="margin-bottom: 10px;">Error loading cart</h2>
+                    <p style="color: #757575; margin-bottom: 20px;">${error.message}</p>
+                    <a href="/orders" style="display: inline-block; background-color: #00C853; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Browse Shops</a>
+                `;
+                checkoutButton.style.display = 'none';
+            });
+        
+        // Helper functions
+        function updateItemQuantity(itemIndex, change) {
+            const cart = JSON.parse(sessionStorage.getItem('orda_cart') || '[]');
+            
+            if (itemIndex >= 0 && itemIndex < cart.length) {
+                const item = cart[itemIndex];
+                
+                // Update quantity
+                item.quantity += change;
+                
+                if (item.quantity <= 0) {
+                    // Remove item from cart
+                    cart.splice(itemIndex, 1);
+                } else {
+                    // Update total price
+                    const unitPrice = item.totalPrice / (item.quantity - change);
+                    item.totalPrice = unitPrice * item.quantity;
+                }
+                
+                // Save updated cart
+                sessionStorage.setItem('orda_cart', JSON.stringify(cart));
+                
+                // Reload page to reflect changes
+                location.reload();
+            }
+        }
+        
+        function updateCartTotals(shopItems) {
+            let subtotal = 0;
+            let deliveryFee = 0;
+            
+            // Calculate subtotal and delivery fee
+            for (const [shopId, data] of Object.entries(shopItems)) {
+                const shop = data.shop;
+                const items = data.items;
+                
+                // Add item prices to subtotal
+                items.forEach(item => {
+                    subtotal += item.totalPrice;
+                });
+                
+                // Add delivery fee
+                deliveryFee += parseFloat(shop.delivery_fee.replace('GH₵ ', ''));
+            }
+            
+            // Update display
+            document.getElementById('subtotal-price').textContent = 'GH₵ ' + subtotal.toFixed(2);
+            document.getElementById('delivery-fee').textContent = 'GH₵ ' + deliveryFee.toFixed(2);
+            document.getElementById('total-price').textContent = 'GH₵ ' + (subtotal + deliveryFee).toFixed(2);
+        }
+    });
+</script>
+{% endblock %}

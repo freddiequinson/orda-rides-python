@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Login Container -->
+    <div class="login-container" style="padding: 20px; max-width: 400px; margin: 0 auto;">
+        <!-- Logo and App Name -->
+        <div style="text-align: center; margin-bottom: 30px; margin-top: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🏍️</div>
+            <h1 style="font-size: 1.8rem; margin-bottom: 5px;">OrDa Rides</h1>
+            <p style="color: #757575; font-size: 0.9rem;">Connecting rural communities</p>
+        </div>
+        
+        <!-- Login Form -->
+        <div class="login-form" style="background-color: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 20px; font-size: 1.5rem; text-align: center;">Login</h2>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #757575;">Phone Number</label>
+                <input type="tel" id="phone-input" placeholder="+233 XX XXX XXXX" style="width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 5px; font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; color: #757575;">Password</label>
+                <input type="password" id="password-input" placeholder="Enter your password" style="width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 5px; font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 20px; text-align: right;">
+                <a href="#" id="forgot-password-link" style="color: #00C853; text-decoration: none; font-size: 0.9rem;">Forgot Password?</a>
+            </div>
+            
+            <button id="login-button" style="width: 100%; padding: 15px; background-color: #00C853; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 20px;">
+                Login
+            </button>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span style="color: #757575; font-size: 0.9rem;">Or continue with</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="sms-login-button" style="flex: 1; padding: 12px; border: 1px solid #E0E0E0; background-color: white; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span style="font-size: 1.2rem;">📱</span>
+                    <span>SMS</span>
+                </button>
+                <button id="otp-login-button" style="flex: 1; padding: 12px; border: 1px solid #E0E0E0; background-color: white; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span style="font-size: 1.2rem;">🔑</span>
+                    <span>OTP</span>
+                </button>
+            </div>
+            
+            <div style="text-align: center;">
+                <span style="color: #757575; font-size: 0.9rem;">Don't have an account?</span>
+                <a href="/signup" style="color: #00C853; text-decoration: none; font-size: 0.9rem; margin-left: 5px;">Sign Up</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide bottom navigation on login page
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            bottomNav.style.display = 'none';
+        }
+        
+        // Hide header on login page
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.display = 'none';
+        }
+        
+        // Login button functionality
+        const loginButton = document.getElementById('login-button');
+        
+        loginButton.addEventListener('click', function() {
+            const phoneInput = document.getElementById('phone-input');
+            const passwordInput = document.getElementById('password-input');
+            
+            if (!phoneInput.value) {
+                alert('Please enter your phone number');
+                return;
+            }
+            
+            if (!passwordInput.value) {
+                alert('Please enter your password');
+                return;
+            }
+            
+            // Check if we have a registered user
+            const storedUserData = sessionStorage.getItem('orda_user');
+            
+            if (storedUserData) {
+                // Parse the stored user data
+                const userData = JSON.parse(storedUserData);
+                
+                // Check if credentials match
+                if (phoneInput.value === userData.phone && passwordInput.value === userData.password) {
+                    // Set user as logged in
+                    sessionStorage.setItem('orda_logged_in', 'true');
+                    window.location.href = '/home';
+                } else {
+                    alert('Invalid phone number or password');
+                }
+            } else {
+                // For demo, allow any login if no registered user
+                alert('Demo mode: Proceeding with login');
+                window.location.href = '/home';
+            }
+        });
+        
+        // Forgot password link
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Password reset feature coming soon!');
+        });
+        
+        // OTP login button
+        const otpLoginButton = document.getElementById('otp-login-button');
+        
+        otpLoginButton.addEventListener('click', function() {
+            const phoneInput = document.getElementById('phone-input');
+            
+            if (!phoneInput.value) {
+                alert('Please enter your phone number first');
+                phoneInput.focus();
+                return;
+            }
+            
+            // Show loading state
+            otpLoginButton.disabled = true;
+            const originalText = otpLoginButton.innerHTML;
+            otpLoginButton.innerHTML = '<span>Sending...</span>';
+            
+            // Send OTP request
+            fetch('/api/send-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phone: phoneInput.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                otpLoginButton.disabled = false;
+                otpLoginButton.innerHTML = originalText;
+                
+                if (data.success) {
+                    // For demo purposes, show the OTP (in a real app, you wouldn't do this)
+                    console.log('OTP for verification:', data.otp);
+                    alert(`For demo purposes, your OTP is: ${data.otp}\n\nIn a real app, this would be sent via SMS.`);
+                    
+                    // Create a temporary user object with just the phone
+                    const tempUser = { phone: phoneInput.value };
+                    sessionStorage.setItem('orda_user_temp', JSON.stringify(tempUser));
+                    
+                    // Redirect to OTP verification page
+                    window.location.href = '/verify-otp';
+                } else {
+                    alert('Failed to send verification code: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sending the verification code.');
+                otpLoginButton.disabled = false;
+                otpLoginButton.innerHTML = originalText;
+            });
+        });
+        
+        // SMS login button
+        const smsLoginButton = document.getElementById('sms-login-button');
+        
+        smsLoginButton.addEventListener('click', function() {
+            alert('SMS login will be implemented in the next version.');
+        });
+    });
+</script>
+{% endblock %}

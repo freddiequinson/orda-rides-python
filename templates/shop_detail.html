@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Shop Banner -->
+    <div class="shop-banner" style="background-color: {{ shop.banner_color }}; color: white; padding: 20px; position: relative;">
+        <div style="display: flex; align-items: center;">
+            <div style="font-size: 3rem; margin-right: 15px;">{{ shop.image }}</div>
+            <div>
+                <h1 style="margin-bottom: 5px; font-size: 1.5rem;">{{ shop.name }}</h1>
+                <div style="font-size: 0.9rem;">{{ shop.subcategory }}</div>
+                <div style="display: flex; align-items: center; margin-top: 5px;">
+                    <span style="margin-right: 10px;">⭐ {{ shop.rating }} ({{ shop.reviews }}+)</span>
+                    <span>{{ shop.delivery_time }}</span>
+                </div>
+            </div>
+        </div>
+        <a href="/orders" style="position: absolute; top: 15px; left: 15px; color: white; font-size: 1.5rem; text-decoration: none;">←</a>
+    </div>
+    
+    <!-- Shop Info -->
+    <div class="shop-info" style="background-color: white; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="margin-bottom: 10px;">{{ shop.description }}</div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #757575;">
+            <div>Delivery Fee: {{ shop.delivery_fee }}</div>
+            <div>Min Order: {{ shop.min_order }}</div>
+        </div>
+    </div>
+    
+    <!-- Menu Categories -->
+    <div class="menu-categories" style="display: flex; overflow-x: auto; padding: 10px 15px; gap: 10px; background-color: white; border-bottom: 1px solid #EEEEEE; margin-bottom: 10px; position: sticky; top: 0; z-index: 10;">
+        {% for category in shop.menu_categories %}
+        <div class="menu-category" data-category="{{ category }}" style="padding: 8px 15px; background-color: {% if loop.first %}#00C853{% else %}#F5F5F5{% endif %}; color: {% if loop.first %}white{% else %}#212121{% endif %}; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem;">{{ category }}</div>
+        {% endfor %}
+    </div>
+    
+    <!-- Menu Items -->
+    <div class="menu-items" style="padding: 0 15px 80px;">
+        {% for category in shop.menu_categories %}
+        <div class="category-section" id="category-{{ category|lower|replace(' ', '-') }}">
+            <h3 style="margin: 15px 0; font-size: 1.2rem;">{{ category }}</h3>
+            
+            {% for item in shop.menu_items %}
+            {% if item.category == category %}
+            <div class="menu-item" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="display: flex; padding: 15px;">
+                    <div style="width: 80px; height: 80px; background-color: {{ shop.banner_color }}; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-right: 15px;">
+                        <span style="font-size: 2rem;">{{ item.image }}</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">{{ item.name }}</div>
+                        <div style="font-size: 0.9rem; color: #757575; margin-bottom: 10px;">{{ item.description }}</div>
+                        <div style="font-weight: bold;">{{ item.price }}</div>
+                    </div>
+                    <button class="add-to-cart-button" data-item-id="{{ item.id }}" data-item-name="{{ item.name }}" data-item-price="{{ item.price }}" data-item-image="{{ item.image }}" style="background-color: #00C853; color: white; border: none; border-radius: 5px; padding: 5px 10px; align-self: flex-end; cursor: pointer;">
+                        Add
+                    </button>
+                </div>
+                
+                <!-- Item Options (hidden by default) -->
+                <div class="item-options" id="options-{{ item.id }}" style="display: none; padding: 0 15px 15px; border-top: 1px solid #EEEEEE;">
+                    {% if item.sizes %}
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">Size</div>
+                        {% for size in item.sizes %}
+                        <div class="option-item" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="radio" name="size-{{ item.id }}" value="{{ size.name }}" data-price="{{ size.price }}" {% if loop.first %}checked{% endif %} style="margin-right: 10px;">
+                                {{ size.name }}
+                            </label>
+                            <span>{{ size.price }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if item.options %}
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">Options</div>
+                        {% for option in item.options %}
+                        <div class="option-item" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <label style="display: flex; align-items: center;">
+                                <input type="checkbox" name="option-{{ item.id }}" value="{{ option.name }}" data-price="{{ option.price }}" style="margin-right: 10px;">
+                                {{ option.name }}
+                            </label>
+                            <span>+{{ option.price }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div style="margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">Quantity</div>
+                        <div style="display: flex; align-items: center;">
+                            <button class="quantity-button minus" style="width: 30px; height: 30px; background-color: #F5F5F5; border: none; border-radius: 5px; font-size: 1.2rem; cursor: pointer;">-</button>
+                            <input type="number" class="quantity-input" value="1" min="1" max="10" style="width: 40px; height: 30px; text-align: center; border: 1px solid #E0E0E0; margin: 0 10px;">
+                            <button class="quantity-button plus" style="width: 30px; height: 30px; background-color: #F5F5F5; border: none; border-radius: 5px; font-size: 1.2rem; cursor: pointer;">+</button>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 0.9rem; color: #757575;">Total</div>
+                            <div class="item-total-price" style="font-weight: bold;">{{ item.price }}</div>
+                        </div>
+                        <button class="add-to-cart-with-options" data-item-id="{{ item.id }}" style="background-color: #00C853; color: white; border: none; border-radius: 5px; padding: 10px 15px; cursor: pointer;">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Cart Button (Fixed at bottom) -->
+    <div id="cart-button" style="position: fixed; bottom: 70px; left: 0; right: 0; background-color: #00C853; color: white; padding: 15px; text-align: center; display: none; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 100;">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 0 auto;">
+            <div>
+                <span id="cart-items-count">0</span> items | <span id="cart-total-price">GH₵ 0</span>
+            </div>
+            <a href="/cart" style="color: white; text-decoration: none; font-weight: bold;">View Cart</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Menu category navigation
+        const menuCategories = document.querySelectorAll('.menu-category');
+        
+        menuCategories.forEach(category => {
+            category.addEventListener('click', function() {
+                // Remove active class from all categories
+                menuCategories.forEach(cat => {
+                    cat.style.backgroundColor = '#F5F5F5';
+                    cat.style.color = '#212121';
+                });
+                
+                // Add active class to clicked category
+                this.style.backgroundColor = '#00C853';
+                this.style.color = 'white';
+                
+                // Scroll to category section
+                const categoryName = this.getAttribute('data-category');
+                const categorySection = document.getElementById('category-' + categoryName.toLowerCase().replace(' ', '-'));
+                
+                if (categorySection) {
+                    window.scrollTo({
+                        top: categorySection.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Add to cart functionality
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-button');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                const itemOptions = document.getElementById('options-' + itemId);
+                
+                // Toggle options visibility
+                if (itemOptions.style.display === 'none') {
+                    itemOptions.style.display = 'block';
+                } else {
+                    itemOptions.style.display = 'none';
+                }
+            });
+        });
+        
+        // Quantity buttons
+        const minusButtons = document.querySelectorAll('.quantity-button.minus');
+        const plusButtons = document.querySelectorAll('.quantity-button.plus');
+        
+        minusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.nextElementSibling;
+                const value = parseInt(input.value);
+                
+                if (value > 1) {
+                    input.value = value - 1;
+                    updateItemTotal(this.closest('.item-options'));
+                }
+            });
+        });
+        
+        plusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const value = parseInt(input.value);
+                
+                if (value < 10) {
+                    input.value = value + 1;
+                    updateItemTotal(this.closest('.item-options'));
+                }
+            });
+        });
+        
+        // Update item total when options change
+        const sizeInputs = document.querySelectorAll('input[type="radio"][name^="size-"]');
+        const optionInputs = document.querySelectorAll('input[type="checkbox"][name^="option-"]');
+        const quantityInputs = document.querySelectorAll('.quantity-input');
+        
+        sizeInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                updateItemTotal(this.closest('.item-options'));
+            });
+        });
+        
+        optionInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                updateItemTotal(this.closest('.item-options'));
+            });
+        });
+        
+        quantityInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                updateItemTotal(this.closest('.item-options'));
+            });
+        });
+        
+        // Add to cart with options
+        const addToCartWithOptionsButtons = document.querySelectorAll('.add-to-cart-with-options');
+        
+        addToCartWithOptionsButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                const itemOptions = document.getElementById('options-' + itemId);
+                const itemName = this.closest('.menu-item').querySelector('div > div:nth-child(2) > div:first-child').textContent;
+                const itemImage = this.closest('.menu-item').querySelector('div > div:first-child > span').textContent;
+                
+                // Get selected size
+                let selectedSize = '';
+                let basePrice = 0;
+                
+                const sizeInputs = itemOptions.querySelectorAll('input[type="radio"][name^="size-"]:checked');
+                if (sizeInputs.length > 0) {
+                    selectedSize = sizeInputs[0].value;
+                    basePrice = parseFloat(sizeInputs[0].getAttribute('data-price').replace('GH₵ ', ''));
+                } else {
+                    // If no size options, get the base price from the item
+                    const priceText = this.closest('.menu-item').querySelector('div > div:nth-child(2) > div:last-child').textContent;
+                    basePrice = parseFloat(priceText.replace('GH₵ ', ''));
+                }
+                
+                // Get selected options
+                const selectedOptions = [];
+                const optionInputs = itemOptions.querySelectorAll('input[type="checkbox"][name^="option-"]:checked');
+                
+                optionInputs.forEach(input => {
+                    selectedOptions.push({
+                        name: input.value,
+                        price: parseFloat(input.getAttribute('data-price').replace('GH₵ ', ''))
+                    });
+                });
+                
+                // Get quantity
+                const quantity = parseInt(itemOptions.querySelector('.quantity-input').value);
+                
+                // Calculate total price
+                let totalPrice = basePrice;
+                
+                selectedOptions.forEach(option => {
+                    totalPrice += option.price;
+                });
+                
+                totalPrice *= quantity;
+                
+                // Create cart item
+                const cartItem = {
+                    id: itemId,
+                    name: itemName,
+                    image: itemImage,
+                    size: selectedSize,
+                    options: selectedOptions,
+                    quantity: quantity,
+                    basePrice: basePrice,
+                    totalPrice: totalPrice
+                };
+                
+                // Add to cart in session storage
+                let cart = JSON.parse(sessionStorage.getItem('orda_cart') || '[]');
+                
+                // Check if item already exists in cart
+                const existingItemIndex = cart.findIndex(item => 
+                    item.id === cartItem.id && 
+                    item.size === cartItem.size && 
+                    JSON.stringify(item.options) === JSON.stringify(cartItem.options)
+                );
+                
+                if (existingItemIndex !== -1) {
+                    // Update quantity and total price
+                    cart[existingItemIndex].quantity += cartItem.quantity;
+                    cart[existingItemIndex].totalPrice += cartItem.totalPrice;
+                } else {
+                    // Add new item to cart
+                    cart.push(cartItem);
+                }
+                
+                // Save cart to session storage
+                sessionStorage.setItem('orda_cart', JSON.stringify(cart));
+                
+                // Update cart button
+                updateCartButton();
+                
+                // Hide options
+                itemOptions.style.display = 'none';
+                
+                // Show success message
+                showMessage('Added to cart!');
+            });
+        });
+        
+        // Update cart button on page load
+        updateCartButton();
+        
+        // Helper functions
+        function updateItemTotal(optionsContainer) {
+            if (!optionsContainer) return;
+            
+            // Get base price (from selected size or item price)
+            let basePrice = 0;
+            const sizeInputs = optionsContainer.querySelectorAll('input[type="radio"][name^="size-"]:checked');
+            
+            if (sizeInputs.length > 0) {
+                basePrice = parseFloat(sizeInputs[0].getAttribute('data-price').replace('GH₵ ', ''));
+            } else {
+                // If no size options, get the base price from the item
+                const priceText = optionsContainer.closest('.menu-item').querySelector('div > div:nth-child(2) > div:last-child').textContent;
+                basePrice = parseFloat(priceText.replace('GH₵ ', ''));
+            }
+            
+            // Add option prices
+            const optionInputs = optionsContainer.querySelectorAll('input[type="checkbox"][name^="option-"]:checked');
+            let optionsTotal = 0;
+            
+            optionInputs.forEach(input => {
+                optionsTotal += parseFloat(input.getAttribute('data-price').replace('GH₵ ', ''));
+            });
+            
+            // Multiply by quantity
+            const quantity = parseInt(optionsContainer.querySelector('.quantity-input').value);
+            
+            // Calculate total
+            const total = (basePrice + optionsTotal) * quantity;
+            
+            // Update total display
+            optionsContainer.querySelector('.item-total-price').textContent = 'GH₵ ' + total.toFixed(2);
+        }
+        
+        function updateCartButton() {
+            const cart = JSON.parse(sessionStorage.getItem('orda_cart') || '[]');
+            const cartButton = document.getElementById('cart-button');
+            const cartItemsCount = document.getElementById('cart-items-count');
+            const cartTotalPrice = document.getElementById('cart-total-price');
+            
+            if (cart.length > 0) {
+                // Calculate total items and price
+                let totalItems = 0;
+                let totalPrice = 0;
+                
+                cart.forEach(item => {
+                    totalItems += item.quantity;
+                    totalPrice += item.totalPrice;
+                });
+                
+                // Update cart button
+                cartItemsCount.textContent = totalItems;
+                cartTotalPrice.textContent = 'GH₵ ' + totalPrice.toFixed(2);
+                
+                // Show cart button
+                cartButton.style.display = 'block';
+            } else {
+                // Hide cart button
+                cartButton.style.display = 'none';
+            }
+        }
+        
+        function showMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.style.position = 'fixed';
+            messageElement.style.bottom = '130px';
+            messageElement.style.left = '50%';
+            messageElement.style.transform = 'translateX(-50%)';
+            messageElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            messageElement.style.color = 'white';
+            messageElement.style.padding = '10px 15px';
+            messageElement.style.borderRadius = '20px';
+            messageElement.style.zIndex = '1000';
+            messageElement.textContent = message;
+            
+            document.body.appendChild(messageElement);
+            
+            setTimeout(() => {
+                document.body.removeChild(messageElement);
+            }, 2000);
+        }
+    });
+</script>
+{% endblock %}

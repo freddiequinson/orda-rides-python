@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Order Confirmation -->
+    <div class="confirmation-container" style="padding: 20px; text-align: center;">
+        <div style="margin: 30px 0;">
+            <div style="font-size: 5rem; margin-bottom: 20px;">✅</div>
+            <h1 style="margin-bottom: 10px; font-size: 1.5rem;">Order Confirmed!</h1>
+            <p style="color: #757575; margin-bottom: 5px;">Your order has been successfully placed</p>
+            <p style="font-weight: bold; margin-bottom: 20px;" id="order-id">Order #: Loading...</p>
+        </div>
+        
+        <div class="order-status" style="background-color: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="margin-bottom: 20px;">
+                <div style="font-size: 0.9rem; color: #757575; margin-bottom: 5px;">Estimated Delivery Time</div>
+                <div style="font-size: 1.2rem; font-weight: bold;" id="delivery-time">Loading...</div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; max-width: 300px; margin: 0 auto;">
+                <div class="status-step active" style="text-align: center;">
+                    <div style="width: 25px; height: 25px; background-color: #00C853; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 5px;">✓</div>
+                    <div style="font-size: 0.8rem;">Confirmed</div>
+                </div>
+                <div class="status-step" style="text-align: center;">
+                    <div style="width: 25px; height: 25px; background-color: #E0E0E0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 5px;">2</div>
+                    <div style="font-size: 0.8rem;">Preparing</div>
+                </div>
+                <div class="status-step" style="text-align: center;">
+                    <div style="width: 25px; height: 25px; background-color: #E0E0E0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 5px;">3</div>
+                    <div style="font-size: 0.8rem;">On the way</div>
+                </div>
+                <div class="status-step" style="text-align: center;">
+                    <div style="width: 25px; height: 25px; background-color: #E0E0E0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin: 0 auto 5px;">4</div>
+                    <div style="font-size: 0.8rem;">Delivered</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="order-details" style="background-color: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin: 0 0 15px; font-size: 1.1rem; text-align: left;">Order Details</h3>
+            
+            <div id="order-items" style="text-align: left; margin-bottom: 15px;">
+                <!-- Order items will be dynamically added here -->
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; text-align: left;">
+                <div>Subtotal</div>
+                <div id="subtotal-price">GH₵ 0.00</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; text-align: left;">
+                <div>Delivery Fee</div>
+                <div id="delivery-fee">GH₵ 0.00</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; text-align: left; padding-top: 5px; border-top: 1px solid #EEEEEE; margin-top: 5px;">
+                <div>Total</div>
+                <div id="total-price">GH₵ 0.00</div>
+            </div>
+        </div>
+        
+        <div class="delivery-info" style="background-color: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="margin: 0 0 15px; font-size: 1.1rem; text-align: left;">Delivery Information</h3>
+            
+            <div style="display: flex; margin-bottom: 10px; text-align: left;">
+                <div style="width: 30px; margin-right: 10px; color: #757575;">📍</div>
+                <div style="flex: 1;">
+                    <div style="font-size: 0.9rem; color: #757575; margin-bottom: 3px;">Delivery Address</div>
+                    <div id="delivery-address">Loading...</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; margin-bottom: 10px; text-align: left;">
+                <div style="width: 30px; margin-right: 10px; color: #757575;">🕒</div>
+                <div style="flex: 1;">
+                    <div style="font-size: 0.9rem; color: #757575; margin-bottom: 3px;">Delivery Time</div>
+                    <div id="delivery-time-detail">Loading...</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; text-align: left;">
+                <div style="width: 30px; margin-right: 10px; color: #757575;">💳</div>
+                <div style="flex: 1;">
+                    <div style="font-size: 0.9rem; color: #757575; margin-bottom: 3px;">Payment Method</div>
+                    <div id="payment-method">Loading...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 80px;">
+            <a href="/order/track/0" id="track-order-link" style="display: inline-block; background-color: #00C853; color: white; text-decoration: none; padding: 12px 20px; border-radius: 5px; margin-bottom: 15px; width: 100%; max-width: 300px; font-weight: bold;">
+                Track Order
+            </a>
+            <a href="/" style="display: inline-block; color: #00C853; text-decoration: none; padding: 10px; width: 100%; max-width: 300px;">
+                Back to Home
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load order data from session storage
+        const orderData = JSON.parse(sessionStorage.getItem('orda_order_data') || '{}');
+        
+        // Check if order data exists
+        if (!orderData.orderId) {
+            window.location.href = '/orders';
+            return;
+        }
+        
+        // Add shop information to items if not already present
+        if (orderData.items && orderData.items.length > 0) {
+            // Fetch shop data to get shop names
+            fetch('/api/shops')
+                .then(response => response.json())
+                .then(shops => {
+                    // Try to find shop for each item and add shop name
+                    orderData.items.forEach(item => {
+                        if (!item.shopName) {
+                            // Look through all shops to find the one containing this item
+                            for (const [shopId, shop] of Object.entries(shops)) {
+                                const menuItem = shop.menu_items.find(menuItem => menuItem.id === item.id);
+                                if (menuItem) {
+                                    item.shopName = shop.name;
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Save updated order data back to session storage
+                    sessionStorage.setItem('orda_order_data', JSON.stringify(orderData));
+                })
+                .catch(error => console.error('Error fetching shop data:', error));
+        }
+        
+        // Update order ID
+        document.getElementById('order-id').textContent = 'Order #: ' + orderData.orderId;
+        
+        // Update track order link
+        document.getElementById('track-order-link').href = '/order/track/' + orderData.orderId;
+        
+        // Calculate and display estimated delivery time
+        const now = new Date();
+        const estimatedMinutes = Math.floor(Math.random() * 20) + 30; // Random between 30-50 minutes
+        const estimatedTime = new Date(now.getTime() + estimatedMinutes * 60000);
+        const timeString = estimatedTime.getHours() + ':' + 
+                          (estimatedTime.getMinutes() < 10 ? '0' : '') + estimatedTime.getMinutes();
+        
+        document.getElementById('delivery-time').textContent = timeString;
+        
+        // Render order items
+        const orderItems = document.getElementById('order-items');
+        
+        if (orderData.items && orderData.items.length > 0) {
+            orderData.items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'order-item';
+                itemElement.style.display = 'flex';
+                itemElement.style.marginBottom = '10px';
+                itemElement.style.fontSize = '0.9rem';
+                
+                // Format options text
+                let optionsText = '';
+                if (item.size) {
+                    optionsText += `Size: ${item.size}`;
+                }
+                
+                if (item.options && item.options.length > 0) {
+                    if (optionsText) optionsText += ', ';
+                    optionsText += item.options.map(opt => opt.name).join(', ');
+                }
+                
+                itemElement.innerHTML = `
+                    <div style="flex: 1;">
+                        ${item.quantity}x ${item.name}
+                        ${optionsText ? `<div style="font-size: 0.8rem; color: #757575;">${optionsText}</div>` : ''}
+                    </div>
+                    <div>GH₵ ${item.totalPrice.toFixed(2)}</div>
+                `;
+                
+                orderItems.appendChild(itemElement);
+            });
+        }
+        
+        // Update totals
+        if (orderData.totals) {
+            document.getElementById('subtotal-price').textContent = 'GH₵ ' + orderData.totals.subtotal.toFixed(2);
+            document.getElementById('delivery-fee').textContent = 'GH₵ ' + orderData.totals.deliveryFee.toFixed(2);
+            document.getElementById('total-price').textContent = 'GH₵ ' + orderData.totals.total.toFixed(2);
+        }
+        
+        // Update delivery information
+        if (orderData.delivery) {
+            document.getElementById('delivery-address').textContent = orderData.delivery.address;
+            document.getElementById('delivery-time-detail').textContent = orderData.delivery.time;
+        }
+        
+        // Update payment method
+        if (orderData.payment) {
+            let paymentText = '';
+            
+            if (orderData.payment.method === 'cash') {
+                paymentText = 'Cash on Delivery';
+            } else if (orderData.payment.method === 'momo' && orderData.payment.details) {
+                const provider = orderData.payment.details.provider;
+                const phone = orderData.payment.details.phone;
+                
+                let providerName = '';
+                switch (provider) {
+                    case 'mtn':
+                        providerName = 'MTN Mobile Money';
+                        break;
+                    case 'vodafone':
+                        providerName = 'Vodafone Cash';
+                        break;
+                    case 'airtel':
+                        providerName = 'AirtelTigo Money';
+                        break;
+                    default:
+                        providerName = 'Mobile Money';
+                }
+                
+                paymentText = `${providerName} (${phone})`;
+            }
+            
+            document.getElementById('payment-method').textContent = paymentText;
+        }
+    });
+</script>
+{% endblock %}

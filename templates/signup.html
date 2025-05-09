@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Signup Container -->
+    <div class="signup-container" style="padding: 20px; max-width: 400px; margin: 0 auto;">
+        <!-- Logo and App Name -->
+        <div style="text-align: center; margin-bottom: 30px; margin-top: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🏍️</div>
+            <h1 style="font-size: 1.8rem; margin-bottom: 5px;">OrDa Rides</h1>
+            <p style="color: #757575; font-size: 0.9rem;">Connecting rural communities</p>
+        </div>
+        
+        <!-- Signup Form -->
+        <div class="signup-form" style="background-color: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 20px; font-size: 1.5rem; text-align: center;">Create Account</h2>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #757575;">Full Name</label>
+                <input type="text" id="name-input" placeholder="Enter your full name" style="width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 5px; font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #757575;">Phone Number</label>
+                <input type="tel" id="phone-input" placeholder="+233 XX XXX XXXX" style="width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 5px; font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #757575;">Email (Optional)</label>
+                <input type="email" id="email-input" placeholder="Enter your email" style="width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 5px; font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; color: #757575;">Password</label>
+                <input type="password" id="password-input" placeholder="Create a password" style="width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 5px; font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; color: #757575;">Confirm Password</label>
+                <input type="password" id="confirm-password-input" placeholder="Confirm your password" style="width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 5px; font-size: 1rem;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" id="terms-checkbox" style="margin-right: 10px;">
+                    <span style="color: #757575; font-size: 0.9rem;">I agree to the <a href="#" style="color: #00C853; text-decoration: none;">Terms & Conditions</a></span>
+                </label>
+            </div>
+            
+            <button id="signup-button" style="width: 100%; padding: 15px; background-color: #00C853; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 20px;">
+                Create Account
+            </button>
+            
+            <div style="text-align: center;">
+                <span style="color: #757575; font-size: 0.9rem;">Already have an account?</span>
+                <a href="/login" style="color: #00C853; text-decoration: none; font-size: 0.9rem; margin-left: 5px;">Login</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide bottom navigation on signup page
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            bottomNav.style.display = 'none';
+        }
+        
+        // Hide header on signup page
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.display = 'none';
+        }
+        
+        // Form validation
+        const nameInput = document.getElementById('name-input');
+        const phoneInput = document.getElementById('phone-input');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const confirmPasswordInput = document.getElementById('confirm-password-input');
+        const termsCheckbox = document.getElementById('terms-checkbox');
+        const signupButton = document.getElementById('signup-button');
+        
+        // Validate form on submit
+        signupButton.addEventListener('click', function() {
+            // Basic validation
+            if (!nameInput.value) {
+                alert('Please enter your full name');
+                nameInput.focus();
+                return;
+            }
+            
+            if (!phoneInput.value) {
+                alert('Please enter your phone number');
+                phoneInput.focus();
+                return;
+            }
+            
+            if (!passwordInput.value) {
+                alert('Please create a password');
+                passwordInput.focus();
+                return;
+            }
+            
+            if (passwordInput.value.length < 6) {
+                alert('Password must be at least 6 characters');
+                passwordInput.focus();
+                return;
+            }
+            
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                alert('Passwords do not match');
+                confirmPasswordInput.focus();
+                return;
+            }
+            
+            if (!termsCheckbox.checked) {
+                alert('Please agree to the Terms & Conditions');
+                return;
+            }
+            
+            // Create user object
+            const user = {
+                name: nameInput.value,
+                phone: phoneInput.value,
+                email: emailInput.value,
+                password: passwordInput.value
+            };
+            
+            // Store user data temporarily
+            sessionStorage.setItem('orda_user_temp', JSON.stringify(user));
+            
+            // Show loading state
+            signupButton.textContent = 'Sending verification code...';
+            signupButton.disabled = true;
+            
+            // Send OTP request
+            fetch('/api/send-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phone: phoneInput.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // For demo purposes, show the OTP (in a real app, you wouldn't do this)
+                    console.log('OTP for verification:', data.otp);
+                    alert(`For demo purposes, your OTP is: ${data.otp}\n\nIn a real app, this would be sent via SMS.`);
+                    
+                    // Redirect to OTP verification page
+                    window.location.href = '/verify-otp';
+                } else {
+                    alert('Failed to send verification code: ' + data.message);
+                    signupButton.textContent = 'Create Account';
+                    signupButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sending the verification code.');
+                signupButton.textContent = 'Create Account';
+                signupButton.disabled = false;
+            });
+        });
+    });
+</script>
+{% endblock %}

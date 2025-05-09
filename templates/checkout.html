@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Checkout Header -->
+    <div class="checkout-header" style="background-color: white; padding: 15px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <a href="/cart" style="color: #212121; text-decoration: none; margin-right: 15px;">←</a>
+        <h1 style="margin: 0; font-size: 1.2rem;">Checkout</h1>
+    </div>
+    
+    <!-- Checkout Form -->
+    <div class="checkout-form" style="padding: 15px 15px 150px;">
+        <!-- Delivery Address -->
+        <div class="section" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="padding: 15px; border-bottom: 1px solid #EEEEEE;">
+                <h3 style="margin: 0 0 5px; font-size: 1rem;">Delivery Address</h3>
+            </div>
+            <div style="padding: 15px;">
+                <div class="address-option" style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="radio" name="address" id="current-location" value="current" checked style="margin-right: 10px;">
+                    <label for="current-location" style="flex: 1;">
+                        <div style="font-weight: bold;">Current Location</div>
+                        <div style="font-size: 0.9rem; color: #757575;" id="current-address">Loading your location...</div>
+                    </label>
+                </div>
+                
+                <div class="address-option" style="display: flex; align-items: flex-start; margin-bottom: 10px;">
+                    <input type="radio" name="address" id="new-address" value="new" style="margin-right: 10px; margin-top: 10px;">
+                    <label for="new-address" style="flex: 1;">
+                        <div style="font-weight: bold;">New Address</div>
+                        <textarea id="address-input" placeholder="Enter your delivery address" style="width: 100%; height: 80px; margin-top: 5px; padding: 10px; border: 1px solid #E0E0E0; border-radius: 5px; resize: none;"></textarea>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delivery Time -->
+        <div class="section" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="padding: 15px; border-bottom: 1px solid #EEEEEE;">
+                <h3 style="margin: 0 0 5px; font-size: 1rem;">Delivery Time</h3>
+            </div>
+            <div style="padding: 15px;">
+                <div class="time-option" style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="radio" name="delivery-time" id="asap" value="asap" checked style="margin-right: 10px;">
+                    <label for="asap" style="flex: 1;">
+                        <div style="font-weight: bold;">As soon as possible</div>
+                        <div style="font-size: 0.9rem; color: #757575;" id="estimated-time">Estimated delivery: 30-45 min</div>
+                    </label>
+                </div>
+                
+                <div class="time-option" style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="radio" name="delivery-time" id="scheduled" value="scheduled" style="margin-right: 10px;">
+                    <label for="scheduled" style="flex: 1;">
+                        <div style="font-weight: bold;">Schedule for later</div>
+                        <select id="delivery-day" style="margin-top: 5px; padding: 10px; border: 1px solid #E0E0E0; border-radius: 5px; width: 100%; margin-bottom: 5px;">
+                            <option value="today">Today</option>
+                            <option value="tomorrow">Tomorrow</option>
+                        </select>
+                        <select id="delivery-time-slot" style="padding: 10px; border: 1px solid #E0E0E0; border-radius: 5px; width: 100%;">
+                            <option value="12:00">12:00 PM - 12:30 PM</option>
+                            <option value="12:30">12:30 PM - 1:00 PM</option>
+                            <option value="13:00">1:00 PM - 1:30 PM</option>
+                            <option value="13:30">1:30 PM - 2:00 PM</option>
+                            <option value="14:00">2:00 PM - 2:30 PM</option>
+                            <option value="14:30">2:30 PM - 3:00 PM</option>
+                            <option value="15:00">3:00 PM - 3:30 PM</option>
+                            <option value="15:30">3:30 PM - 4:00 PM</option>
+                            <option value="16:00">4:00 PM - 4:30 PM</option>
+                            <option value="16:30">4:30 PM - 5:00 PM</option>
+                            <option value="17:00">5:00 PM - 5:30 PM</option>
+                            <option value="17:30">5:30 PM - 6:00 PM</option>
+                            <option value="18:00">6:00 PM - 6:30 PM</option>
+                            <option value="18:30">6:30 PM - 7:00 PM</option>
+                            <option value="19:00">7:00 PM - 7:30 PM</option>
+                            <option value="19:30">7:30 PM - 8:00 PM</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Method -->
+        <div class="section" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="padding: 15px; border-bottom: 1px solid #EEEEEE;">
+                <h3 style="margin: 0 0 5px; font-size: 1rem;">Payment Method</h3>
+            </div>
+            <div style="padding: 15px;">
+                <div class="payment-option" style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="radio" name="payment-method" id="cash" value="cash" checked style="margin-right: 10px;">
+                    <label for="cash" style="flex: 1;">
+                        <div style="font-weight: bold;">Cash on Delivery</div>
+                        <div style="font-size: 0.9rem; color: #757575;">Pay with cash when your order arrives</div>
+                    </label>
+                </div>
+                
+                <div class="payment-option" style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <input type="radio" name="payment-method" id="momo" value="momo" style="margin-right: 10px;">
+                    <label for="momo" style="flex: 1;">
+                        <div style="font-weight: bold;">Mobile Money</div>
+                        <div style="font-size: 0.9rem; color: #757575;">Pay with MTN, Vodafone, or AirtelTigo Mobile Money</div>
+                    </label>
+                </div>
+                
+                <!-- Mobile Money Details (hidden by default) -->
+                <div id="momo-details" style="margin-top: 10px; padding: 10px; border: 1px solid #E0E0E0; border-radius: 5px; display: none;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Select Provider</label>
+                        <select id="momo-provider" style="width: 100%; padding: 10px; border: 1px solid #E0E0E0; border-radius: 5px;">
+                            <option value="mtn">MTN Mobile Money</option>
+                            <option value="vodafone">Vodafone Cash</option>
+                            <option value="airtel">AirtelTigo Money</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-size: 0.9rem;">Phone Number</label>
+                        <input type="tel" id="momo-phone" placeholder="Enter your mobile money number" style="width: 100%; padding: 10px; border: 1px solid #E0E0E0; border-radius: 5px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="section" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="padding: 15px; border-bottom: 1px solid #EEEEEE;">
+                <h3 style="margin: 0 0 5px; font-size: 1rem;">Order Summary</h3>
+            </div>
+            <div id="order-items" style="padding: 0 15px;">
+                <!-- Order items will be dynamically added here -->
+            </div>
+            <div style="padding: 15px; border-top: 1px solid #EEEEEE;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div>Subtotal</div>
+                    <div id="subtotal-price">GH₵ 0.00</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div>Delivery Fee</div>
+                    <div id="delivery-fee">GH₵ 0.00</div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                    <div>Total</div>
+                    <div id="total-price">GH₵ 0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Place Order Button (Fixed at bottom) -->
+    <div id="place-order-button" style="position: fixed; bottom: 70px; left: 0; right: 0; background-color: white; padding: 15px; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); z-index: 100;">
+        <div style="max-width: 500px; margin: 0 auto;">
+            <button id="place-order-btn" style="width: 100%; background-color: #00C853; color: white; border: none; border-radius: 5px; padding: 12px; font-weight: bold; cursor: pointer;">
+                Place Order
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load checkout data from session storage
+        const checkoutData = JSON.parse(sessionStorage.getItem('orda_checkout_data') || '{}');
+        const cart = JSON.parse(sessionStorage.getItem('orda_cart') || '[]');
+        
+        // Check if cart is empty
+        if (cart.length === 0) {
+            window.location.href = '/cart';
+            return;
+        }
+        
+        // Get current location for delivery
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Use reverse geocoding to get address from coordinates
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // For demo purposes, we'll just show the coordinates
+                    document.getElementById('current-address').textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)} (Adeiso, Ghana)`;
+                },
+                function(error) {
+                    console.error('Error getting location:', error);
+                    document.getElementById('current-address').textContent = 'Unable to get your location. Please enter an address.';
+                    document.getElementById('new-address').checked = true;
+                }
+            );
+        } else {
+            document.getElementById('current-address').textContent = 'Geolocation is not supported by your browser. Please enter an address.';
+            document.getElementById('new-address').checked = true;
+        }
+        
+        // Toggle Mobile Money details
+        const paymentMethods = document.querySelectorAll('input[name="payment-method"]');
+        const momoDetails = document.getElementById('momo-details');
+        
+        paymentMethods.forEach(method => {
+            method.addEventListener('change', function() {
+                if (this.value === 'momo') {
+                    momoDetails.style.display = 'block';
+                } else {
+                    momoDetails.style.display = 'none';
+                }
+            });
+        });
+        
+        // Render order summary
+        const orderItems = document.getElementById('order-items');
+        let subtotal = 0;
+        let deliveryFee = 0;
+        
+        if (checkoutData.shops) {
+            for (const [shopId, data] of Object.entries(checkoutData.shops)) {
+                const shop = data.shop;
+                const items = data.items;
+                
+                // Create shop section
+                const shopSection = document.createElement('div');
+                shopSection.className = 'shop-section';
+                shopSection.style.paddingTop = '15px';
+                shopSection.style.paddingBottom = '15px';
+                shopSection.style.borderBottom = '1px solid #EEEEEE';
+                
+                // Shop header
+                const shopHeader = document.createElement('div');
+                shopHeader.style.display = 'flex';
+                shopHeader.style.alignItems = 'center';
+                shopHeader.style.marginBottom = '10px';
+                
+                shopHeader.innerHTML = `
+                    <div style="font-size: 1.2rem; margin-right: 10px;">${shop.image}</div>
+                    <div style="flex: 1; font-weight: bold;">${shop.name}</div>
+                `;
+                
+                shopSection.appendChild(shopHeader);
+                
+                // Items list
+                items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'order-item';
+                    itemElement.style.display = 'flex';
+                    itemElement.style.marginBottom = '10px';
+                    itemElement.style.fontSize = '0.9rem';
+                    
+                    itemElement.innerHTML = `
+                        <div style="flex: 1;">
+                            ${item.quantity}x ${item.name}
+                            <span style="font-size: 0.8rem; color: #757575; display: block;">
+                                ${item.size ? 'Size: ' + item.size : ''}
+                                ${item.options && item.options.length > 0 ? ', ' + item.options.map(opt => opt.name).join(', ') : ''}
+                            </span>
+                        </div>
+                        <div>GH₵ ${item.totalPrice.toFixed(2)}</div>
+                    `;
+                    
+                    shopSection.appendChild(itemElement);
+                    
+                    // Add to subtotal
+                    subtotal += item.totalPrice;
+                });
+                
+                orderItems.appendChild(shopSection);
+                
+                // Add delivery fee
+                deliveryFee += parseFloat(shop.delivery_fee.replace('GH₵ ', ''));
+            }
+        } else {
+            // Fallback if shops data is not available
+            cart.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'order-item';
+                itemElement.style.display = 'flex';
+                itemElement.style.marginBottom = '10px';
+                itemElement.style.fontSize = '0.9rem';
+                
+                itemElement.innerHTML = `
+                    <div style="flex: 1;">
+                        ${item.quantity}x ${item.name}
+                        <span style="font-size: 0.8rem; color: #757575; display: block;">
+                            ${item.size ? 'Size: ' + item.size : ''}
+                            ${item.options && item.options.length > 0 ? ', ' + item.options.map(opt => opt.name).join(', ') : ''}
+                        </span>
+                    </div>
+                    <div>GH₵ ${item.totalPrice.toFixed(2)}</div>
+                `;
+                
+                orderItems.appendChild(itemElement);
+                
+                // Add to subtotal
+                subtotal += item.totalPrice;
+            });
+            
+            // Estimate delivery fee
+            deliveryFee = 5;
+        }
+        
+        // Update totals
+        document.getElementById('subtotal-price').textContent = 'GH₵ ' + subtotal.toFixed(2);
+        document.getElementById('delivery-fee').textContent = 'GH₵ ' + deliveryFee.toFixed(2);
+        document.getElementById('total-price').textContent = 'GH₵ ' + (subtotal + deliveryFee).toFixed(2);
+        
+        // Place order button
+        document.getElementById('place-order-btn').addEventListener('click', function() {
+            // Validate form
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Check address
+            if (document.getElementById('new-address').checked && !document.getElementById('address-input').value.trim()) {
+                isValid = false;
+                errorMessage = 'Please enter a delivery address';
+            }
+            
+            // Check mobile money details if selected
+            if (document.getElementById('momo').checked) {
+                const momoPhone = document.getElementById('momo-phone').value.trim();
+                if (!momoPhone) {
+                    isValid = false;
+                    errorMessage = 'Please enter your mobile money number';
+                } else if (!/^\d{10}$/.test(momoPhone)) {
+                    isValid = false;
+                    errorMessage = 'Please enter a valid 10-digit phone number';
+                }
+            }
+            
+            if (!isValid) {
+                showMessage(errorMessage);
+                return;
+            }
+            
+            // Collect order data
+            const orderData = {
+                items: cart,
+                delivery: {
+                    address: document.getElementById('current-location').checked ? 
+                        document.getElementById('current-address').textContent : 
+                        document.getElementById('address-input').value.trim(),
+                    time: document.getElementById('asap').checked ? 
+                        'ASAP' : 
+                        document.getElementById('delivery-day').value + ' ' + document.getElementById('delivery-time-slot').value
+                },
+                payment: {
+                    method: document.getElementById('cash').checked ? 'cash' : 'momo',
+                    details: document.getElementById('momo').checked ? {
+                        provider: document.getElementById('momo-provider').value,
+                        phone: document.getElementById('momo-phone').value.trim()
+                    } : null
+                },
+                totals: {
+                    subtotal: subtotal,
+                    deliveryFee: deliveryFee,
+                    total: subtotal + deliveryFee
+                },
+                orderId: generateOrderId(),
+                orderDate: new Date().toISOString()
+            };
+            
+            // Save order data
+            sessionStorage.setItem('orda_order_data', JSON.stringify(orderData));
+            
+            // Clear cart
+            sessionStorage.removeItem('orda_cart');
+            sessionStorage.removeItem('orda_checkout_data');
+            
+            // Redirect to confirmation page
+            window.location.href = '/order/confirm';
+        });
+        
+        // Helper functions
+        function showMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.style.position = 'fixed';
+            messageElement.style.bottom = '130px';
+            messageElement.style.left = '50%';
+            messageElement.style.transform = 'translateX(-50%)';
+            messageElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            messageElement.style.color = 'white';
+            messageElement.style.padding = '10px 15px';
+            messageElement.style.borderRadius = '20px';
+            messageElement.style.zIndex = '1000';
+            messageElement.textContent = message;
+            
+            document.body.appendChild(messageElement);
+            
+            setTimeout(() => {
+                document.body.removeChild(messageElement);
+            }, 3000);
+        }
+        
+        function generateOrderId() {
+            // Generate a random order ID (for demo purposes)
+            const prefix = 'ORD';
+            const timestamp = new Date().getTime().toString().slice(-6);
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return prefix + timestamp + random;
+        }
+    });
+</script>
+{% endblock %}

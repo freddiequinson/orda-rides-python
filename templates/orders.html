@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Search Bar -->
+    <div class="search-container" style="padding: 15px; position: sticky; top: 0; background-color: white; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div style="position: relative;">
+            <input type="text" id="search-input" placeholder="Search for food or shops" style="width: 100%; padding: 12px 15px 12px 40px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 1rem;">
+            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #9E9E9E;">🔍</span>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs" style="display: flex; overflow-x: auto; padding: 10px 15px; gap: 10px; background-color: white; border-bottom: 1px solid #EEEEEE;">
+        <div class="category-tab active" data-category="all" style="padding: 8px 15px; background-color: #00C853; color: white; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem;">All</div>
+        <div class="category-tab" data-category="food" style="padding: 8px 15px; background-color: #F5F5F5; color: #212121; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem;">Food</div>
+        <div class="category-tab" data-category="groceries" style="padding: 8px 15px; background-color: #F5F5F5; color: #212121; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem;">Groceries</div>
+        <div class="category-tab" data-category="pharmacy" style="padding: 8px 15px; background-color: #F5F5F5; color: #212121; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem;">Pharmacy</div>
+        <div class="category-tab" data-category="electronics" style="padding: 8px 15px; background-color: #F5F5F5; color: #212121; border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem;">Electronics</div>
+    </div>
+
+    <!-- Featured Shops -->
+    <div class="section" style="padding: 15px;">
+        <h3 class="section-title" style="margin-bottom: 15px; font-size: 1.2rem;">Featured Shops</h3>
+        <div class="shops-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            {% set featured_count = 0 %}
+            {% for shop_id, shop in shops.items() %}
+                {% if shop.category in ['food', 'groceries'] and featured_count < 4 %}
+                    {% set featured_count = featured_count + 1 %}
+                    <a href="/shop/{{ shop_id }}" class="shop-card" data-category="{{ shop.category }}" style="background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; color: inherit;">
+                        <div style="height: 100px; background-color: {{ shop.banner_color }}; display: flex; align-items: center; justify-content: center; font-size: 2rem;">{{ shop.image }}</div>
+                        <div style="padding: 10px;">
+                            <div style="font-weight: bold;">{{ shop.name }}</div>
+                            <div style="font-size: 0.8rem; color: #757575;">{{ shop.subcategory }}</div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.8rem;">
+                                <span>⭐ {{ shop.rating }} ({{ shop.reviews }}+)</span>
+                                <span>{{ shop.delivery_time }}</span>
+                            </div>
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Popular Items -->
+    <div class="section" style="padding: 15px;">
+        <h3 class="section-title" style="margin-bottom: 15px; font-size: 1.2rem;">Popular Items</h3>
+        <div class="items-container" style="display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px;">
+            {% for shop_id, shop in shops.items() %}
+                {% if shop.menu_items|length > 0 %}
+                    {% set item = shop.menu_items[0] %}
+                    <a href="/shop/{{ shop_id }}" class="item-card" data-category="{{ shop.category }}" style="min-width: 150px; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-decoration: none; color: inherit;">
+                        <div style="height: 100px; background-color: {{ shop.banner_color }}; display: flex; align-items: center; justify-content: center; font-size: 2rem;">{{ item.image }}</div>
+                        <div style="padding: 10px;">
+                            <div style="font-weight: bold;">{{ item.name }}</div>
+                            <div style="font-size: 0.8rem; color: #757575;">{{ shop.name }}</div>
+                            <div style="font-weight: bold; margin-top: 5px;">{{ item.price }}</div>
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- All Shops -->
+    <div class="section" style="padding: 15px;">
+        <h3 class="section-title" style="margin-bottom: 15px; font-size: 1.2rem;">All Shops</h3>
+        <div class="shops-list" style="display: flex; flex-direction: column; gap: 15px;">
+            {% for shop_id, shop in shops.items() %}
+            <a href="/shop/{{ shop_id }}" class="shop-list-item" data-category="{{ shop.category }}" style="background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; text-decoration: none; color: inherit;">
+                <div style="width: 80px; height: 80px; background-color: {{ shop.banner_color }}; display: flex; align-items: center; justify-content: center; font-size: 2rem;">{{ shop.image }}</div>
+                <div style="padding: 10px; flex: 1;">
+                    <div style="font-weight: bold;">{{ shop.name }}</div>
+                    <div style="font-size: 0.8rem; color: #757575;">{{ shop.subcategory }}</div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.8rem;">
+                        <span>⭐ {{ shop.rating }} ({{ shop.reviews }}+)</span>
+                        <span>{{ shop.delivery_time }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Define shop categories
+        const shopCategories = {
+            'food': ['Adeiso Pizza', 'Adeiso Chicken', 'Adeiso Local Food'],
+            'groceries': ['Fresh Market', 'Adeiso Market'],
+            'pharmacy': ['Adeiso Pharmacy'],
+            'electronics': ['Tech Hub', 'Agya Owusu Electricals']
+        };
+        
+        // Define item categories
+        const itemCategories = {
+            'food': ['Burger', 'Jollof Rice', 'Fried Chicken'],
+            'groceries': ['Fresh Juice'],
+            'pharmacy': [],
+            'electronics': []
+        };
+        
+        // We'll use direct querySelector calls instead of variables to avoid redeclaration issues
+        
+        // Category tabs functionality
+        const categoryTabs = document.querySelectorAll('.category-tab');
+        
+        categoryTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                categoryTabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.style.backgroundColor = '#F5F5F5';
+                    t.style.color = '#212121';
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                this.style.backgroundColor = '#00C853';
+                this.style.color = 'white';
+                
+                // Get selected category
+                const category = this.getAttribute('data-category');
+                console.log('Selected category:', category);
+                
+                // Filter shops and items based on category
+                if (category === 'all') {
+                    // Show all shops and items
+                    document.querySelectorAll('.shop-card').forEach(card => card.style.display = 'block');
+                    document.querySelectorAll('.shop-list-item').forEach(item => item.style.display = 'flex');
+                    document.querySelectorAll('.item-card').forEach(card => card.style.display = 'block');
+                } else {
+                    // Filter shops
+                    document.querySelectorAll('.shop-card').forEach(card => {
+                        const shopNameElement = card.querySelector('div > div:first-child');
+                        if (shopNameElement) {
+                            const shopName = shopNameElement.textContent.trim();
+                            if (shopCategories[category] && shopCategories[category].includes(shopName)) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        }
+                    });
+                    
+                    // Filter shop list items
+                    document.querySelectorAll('.shop-list-item').forEach(item => {
+                        const shopNameElement = item.querySelector('div > div:first-child');
+                        if (shopNameElement) {
+                            const shopName = shopNameElement.textContent.trim();
+                            if (shopCategories[category] && shopCategories[category].includes(shopName)) {
+                                item.style.display = 'flex';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        }
+                    });
+                    
+                    // Filter items
+                    document.querySelectorAll('.item-card').forEach(card => {
+                        const itemNameElement = card.querySelector('div > div:first-child');
+                        if (itemNameElement) {
+                            const itemName = itemNameElement.textContent.trim();
+                            if (itemCategories[category] && itemCategories[category].includes(itemName)) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        }
+                    });
+                }
+                
+                // Show a message when a category is selected
+                const message = document.createElement('div');
+                message.style.position = 'fixed';
+                message.style.bottom = '70px';
+                message.style.left = '50%';
+                message.style.transform = 'translateX(-50%)';
+                message.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                message.style.color = 'white';
+                message.style.padding = '10px 15px';
+                message.style.borderRadius = '20px';
+                message.style.zIndex = '1000';
+                message.textContent = `Showing ${category === 'all' ? 'all shops' : category + ' shops'}`;
+                
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    document.body.removeChild(message);
+                }, 2000);
+            });
+        });
+        
+        // Shop cards now link directly to their detail pages
+        // No need for click event handlers as we're using <a> tags with href attributes
+        
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        
+        searchInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                const searchTerm = this.value.trim().toLowerCase();
+                
+                if (searchTerm) {
+                    // Filter shop cards based on search term
+                    const shopCards = document.querySelectorAll('.shop-card, .shop-list-item, .item-card');
+                    
+                    shopCards.forEach(card => {
+                        const shopName = card.querySelector('div:nth-child(2) > div:first-child').textContent.toLowerCase();
+                        const shopCategory = card.getAttribute('data-category').toLowerCase();
+                        
+                        if (shopName.includes(searchTerm) || shopCategory.includes(searchTerm)) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    // Show a message with search results
+                    const message = document.createElement('div');
+                    message.style.position = 'fixed';
+                    message.style.bottom = '70px';
+                    message.style.left = '50%';
+                    message.style.transform = 'translateX(-50%)';
+                    message.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                    message.style.color = 'white';
+                    message.style.padding = '10px 15px';
+                    message.style.borderRadius = '20px';
+                    message.style.zIndex = '1000';
+                    message.textContent = `Search results for: ${searchTerm}`;
+                    
+                    document.body.appendChild(message);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(message);
+                    }, 2000);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

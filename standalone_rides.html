@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrDa Rides - Book a Ride</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #F5F5F5;
+        }
+        
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            height: 100vh;
+            background-color: white;
+            overflow: hidden;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .booking-form {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            z-index: 20;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .handle {
+            width: 40px;
+            height: 5px;
+            background-color: #E0E0E0;
+            border-radius: 3px;
+            margin: 15px auto 5px;
+        }
+        
+        .location-input {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+        
+        .location-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #FF5252;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .location-display {
+            flex: 1;
+            font-size: 1rem;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .map-button {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #757575;
+            padding: 5px;
+            margin-left: 5px;
+        }
+        
+        .search-button {
+            width: 100%;
+            padding: 16px;
+            background-color: #FF5252;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .search-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .map-selection-indicator {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            z-index: 10;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .cancel-button {
+            background-color: #FF5252;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 10;
+            cursor: pointer;
+        }
+        
+        .location-button {
+            position: absolute;
+            bottom: 160px;
+            right: 15px;
+            background-color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 10;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- Map Container -->
+    <div id="map-container" style="position: relative; height: 100vh; width: 100%; z-index: 1;">
+        <div id="map"></div>
+        
+        <!-- Back Button -->
+        <button id="back-button" class="back-button">
+            <span style="font-size: 18px;">←</span>
+        </button>
+        
+        <!-- Current Location Button -->
+        <button id="current-location-button" class="location-button">
+            <span style="font-size: 18px;">📍</span>
+        </button>
+        
+        <!-- Map Selection Mode Indicator -->
+        <div id="map-selection-indicator" class="map-selection-indicator">
+            <p style="margin: 0 0 10px 0; font-weight: 500;">Tap on the map to select <span id="selection-type">pickup</span> location</p>
+            <button id="cancel-selection-button" class="cancel-button">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Booking Form -->
+    <div id="booking-form" class="booking-form">
+        <div class="handle"></div>
+        
+        <div style="padding: 15px 20px 25px;">
+            <!-- Location Inputs -->
+            <div style="margin-bottom: 20px;">
+                <!-- Pickup Input -->
+                <div class="location-input">
+                    <div class="location-icon">🏍️</div>
+                    <div id="pickup-display" class="location-display" style="color: #757575;">Your current location</div>
+                    <button id="pickup-map-button" class="map-button">📍</button>
+                </div>
+                
+                <!-- Destination Input -->
+                <div class="location-input" style="border-bottom: none;">
+                    <div class="location-icon">📌</div>
+                    <div id="destination-display" class="location-display" style="color: #757575;">Enter destination</div>
+                    <button id="destination-map-button" class="map-button">📍</button>
+                </div>
+            </div>
+            
+            <!-- Popular Destinations -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 0.9rem; color: #757575; margin-bottom: 12px; font-weight: 500;">Popular Destinations</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <div class="popular-destination" data-location="Adeiso Market" style="background-color: #F5F5F5; padding: 10px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer;">
+                        <span style="margin-right: 5px; color: #FF5252;">📍</span> Adeiso Market
+                    </div>
+                    <div class="popular-destination" data-location="Adeiso Hospital" style="background-color: #F5F5F5; padding: 10px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer;">
+                        <span style="margin-right: 5px; color: #FF5252;">📍</span> Adeiso Hospital
+                    </div>
+                    <div class="popular-destination" data-location="Adeiso School" style="background-color: #F5F5F5; padding: 10px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer;">
+                        <span style="margin-right: 5px; color: #FF5252;">📍</span> Adeiso School
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Find Riders Button -->
+            <button id="search-button" class="search-button" disabled>Find Riders</button>
+        </div>
+    </div>
+    
+    <!-- Riders Section (hidden by default) -->
+    <div id="riders-section" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background-color: white; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.15); max-height: 80vh; overflow-y: auto; z-index: 100; max-width: 500px; margin: 0 auto;">
+        <div class="handle"></div>
+        
+        <div style="padding: 10px 20px 0;">
+            <!-- Route Info Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div>
+                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 5px;">Choose your ride</h3>
+                    <div style="display: flex; align-items: center;">
+                        <span id="ride-time-display" style="font-size: 0.9rem; color: #757575; margin-right: 15px;">9 min</span>
+                        <span id="ride-distance-display" style="font-size: 0.9rem; color: #757575;">2.5 km</span>
+                    </div>
+                </div>
+                <button id="change-route-button" style="background: none; border: none; color: #FF5252; font-weight: 500; cursor: pointer;">Change</button>
+            </div>
+            
+            <!-- Ride Options -->
+            <div style="margin-bottom: 20px;">
+                <!-- Standard Option -->
+                <div class="ride-option active" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid #FF5252; background-color: rgba(255,82,82,0.05);">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">🏍️</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Standard</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Regular okada ride</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 25</div>
+                </div>
+                
+                <!-- Express Option -->
+                <div class="ride-option" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent;">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">⚡</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Express</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Faster okada ride</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 35</div>
+                </div>
+                
+                <!-- Premium Option -->
+                <div class="ride-option" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent;">
+                    <div style="width: 48px; height: 48px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 24px;">👑</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Premium</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Luxury okada experience</div>
+                    </div>
+                    <div style="font-weight: 600; color: #000;">GH₵ 45</div>
+                </div>
+            </div>
+            
+            <!-- Available Riders -->
+            <h4 style="font-size: 0.9rem; color: #757575; margin-bottom: 12px; font-weight: 500;">Available Riders</h4>
+            <div id="riders-list">
+                <!-- Rider 1 -->
+                <div class="rider-item" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #E0E0E0;">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rider" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">John Doe</div>
+                        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                            <span style="color: #FFB400; margin-right: 5px;">★</span>
+                            <span style="font-size: 0.9rem;">4.8</span>
+                            <span style="font-size: 0.8rem; color: #757575; margin-left: 10px;">Honda CG 125</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #757575;">Arrives in 5 min</div>
+                    </div>
+                    <button class="select-rider-button" style="background-color: #FF5252; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 500; cursor: pointer;">Select</button>
+                </div>
+                
+                <!-- Rider 2 -->
+                <div class="rider-item" style="display: flex; align-items: center; padding: 15px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #E0E0E0;">
+                    <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="Rider" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 3px;">Michael Smith</div>
+                        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                            <span style="color: #FFB400; margin-right: 5px;">★</span>
+                            <span style="font-size: 0.9rem;">4.6</span>
+                            <span style="font-size: 0.8rem; color: #757575; margin-left: 10px;">Yamaha YBR 125</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #757575;">Arrives in 8 min</div>
+                    </div>
+                    <button class="select-rider-button" style="background-color: #FF5252; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 500; cursor: pointer;">Select</button>
+                </div>
+            </div>
+        </div>
+        
+        <div style="padding: 15px 20px 25px; border-top: 1px solid #F0F0F0; margin-top: 20px;">
+            <button id="book-ride-button" style="width: 100%; padding: 16px; background-color: #FF5252; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">Book Ride</button>
+        </div>
+    </div>
+    
+    <!-- Ride Confirmation Overlay (hidden by default) -->
+    <div id="ride-confirmation-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: white; z-index: 40; max-width: 500px; margin: 0 auto; overflow-y: auto;">
+        <div style="padding: 15px 20px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center;">
+            <button id="back-to-riders-button" style="background: none; border: none; font-size: 1.5rem; margin-right: 15px; cursor: pointer;">←</button>
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin: 0;">Confirm Your Ride</h3>
+        </div>
+        
+        <div style="padding: 20px;">
+            <!-- Map Preview -->
+            <div style="height: 200px; background-color: #F5F5F5; border-radius: 12px; margin-bottom: 20px; position: relative; overflow: hidden;">
+                <div id="confirmation-map" style="height: 100%; width: 100%;"></div>
+            </div>
+            
+            <!-- Ride Details -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Ride Details</h4>
+                
+                <div style="display: flex; margin-bottom: 15px;">
+                    <div style="margin-right: 15px; display: flex; flex-direction: column; align-items: center;">
+                        <div style="width: 12px; height: 12px; background-color: #FF5252; border-radius: 50%;"></div>
+                        <div style="width: 2px; height: 30px; background-color: #E0E0E0; margin: 5px 0;"></div>
+                        <div style="width: 12px; height: 12px; background-color: #FF5252; border-radius: 50%;"></div>
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-weight: 500; margin-bottom: 3px;" id="confirmation-pickup">Your current location</div>
+                            <div style="font-size: 0.8rem; color: #757575;">Pickup point</div>
+                        </div>
+                        
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: 3px;" id="confirmation-destination">Adeiso Market</div>
+                            <div style="font-size: 0.8rem; color: #757575;">Destination</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; padding: 15px; background-color: #F5F5F5; border-radius: 12px;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Distance</div>
+                        <div style="font-weight: 500;" id="confirmation-distance">2.5 km</div>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Duration</div>
+                        <div style="font-weight: 500;" id="confirmation-duration">9 min</div>
+                    </div>
+                    
+                    <div>
+                        <div style="font-size: 0.8rem; color: #757575; margin-bottom: 5px;">Price</div>
+                        <div style="font-weight: 500;" id="confirmation-price">GH₵ 25</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rider Info -->
+            <div id="selected-rider-info" style="padding: 20px; border-radius: 12px; background-color: #F5F5F5; margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Your Rider</h4>
+                <div style="display: flex; align-items: center;">
+                    <img id="confirmation-rider-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Rider" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                    <div style="flex: 1;">
+                        <div id="confirmation-rider-name" style="font-weight: 600; margin-bottom: 3px;">John Doe</div>
+                        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                            <span style="color: #FFB400; margin-right: 5px;">★</span>
+                            <span id="confirmation-rider-rating" style="font-size: 0.9rem;">4.8</span>
+                            <span id="confirmation-rider-bike" style="font-size: 0.8rem; color: #757575; margin-left: 10px;">Honda CG 125</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #757575;">Arrives in 5 min</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 1rem; margin: 0 0 15px 0; font-weight: 500;">Payment Method</h4>
+                <div style="display: flex; align-items: center; padding: 15px; border-radius: 12px; background-color: #F5F5F5;">
+                    <div style="width: 40px; height: 40px; background-color: #E0E0E0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                        <span style="font-size: 20px;">💵</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500;">Cash</div>
+                        <div style="font-size: 0.8rem; color: #757575;">Pay with cash</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="padding: 15px 20px 25px; border-top: 1px solid #F0F0F0;">
+            <button id="confirm-ride-button" style="width: 100%; padding: 16px; background-color: #FF5252; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer;">Confirm Ride</button>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    // Global variables
+    let map, pickupMarker, destinationMarker, routeControl;
+    let pickupCoords, destinationCoords;
+    let isSelectingOnMap = false;
+    let currentSelectionType = '';
+    let currentRouteInfo = null;
+    let selectedRider = null;
+    
+    // Location coordinates (example data)
+    const locationCoordinates = {
+        "Adeiso Market": {lat: 5.8003, lng: -0.5103},
+        "Adeiso Hospital": {lat: 5.8050, lng: -0.5080},
+        "Adeiso School": {lat: 5.7980, lng: -0.5150}
+    };
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initMap();
+        initFormControls();
+    });
+    
+    // Initialize the map
+    function initMap() {
+        // Create map centered on Adeiso
+        map = L.map('map').setView([5.8003, -0.5103], 14);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add map click event for selecting locations
+        map.on('click', function(e) {
+            if (isSelectingOnMap) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                
+                if (currentSelectionType === 'pickup') {
+                    // Set pickup coordinates
+                    pickupCoords = {lat: lat, lng: lng};
+                    
+                    // Add marker
+                    if (pickupMarker) {
+                        map.removeLayer(pickupMarker);
+                    }
+                    
+                    const pickupIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: #FF5252; width: 12px; height: 12px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>',
+                        iconSize: [18, 18],
+                        iconAnchor: [9, 9]
+                    });
+                    
+                    pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map);
+                    
+                    // Update pickup display
+                    document.getElementById('pickup-display').textContent = 'Selected location';
+                    document.getElementById('pickup-display').style.color = '#000';
+                } else if (currentSelectionType === 'destination') {
+                    // Set destination coordinates
+                    destinationCoords = {lat: lat, lng: lng};
+                    
+                    // Add marker
+                    if (destinationMarker) {
+                        map.removeLayer(destinationMarker);
+                    }
+                    
+                    const destIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: #FF5252; width: 12px; height: 12px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>',
+                        iconSize: [18, 18],
+                        iconAnchor: [9, 9]
+                    });
+                    
+                    destinationMarker = L.marker([lat, lng], { icon: destIcon }).addTo(map);
+                    
+                    // Update destination display
+                    document.getElementById('destination-display').textContent = 'Selected location';
+                    document.getElementById('destination-display').style.color = '#000';
+                }
+                
+                // Hide map selection indicator
+                document.getElementById('map-selection-indicator').style.display = 'none';
+                isSelectingOnMap = false;
+                currentSelectionType = '';
+                
+                // If both pickup and destination are set, draw route
+                if (pickupCoords && destinationCoords) {
+                    drawRoute(pickupCoords, destinationCoords);
+                }
+                
+                // Update search button state
+                updateSearchButtonState();
+            }
+        });
+    }
+    
+    // Initialize form controls
+    function initFormControls() {
+        // Initialize pickup map button
+        document.getElementById('pickup-map-button').addEventListener('click', function() {
+            startMapSelection('pickup');
+        });
+        
+        // Initialize destination map button
+        document.getElementById('destination-map-button').addEventListener('click', function() {
+            startMapSelection('destination');
+        });
+        
+        // Initialize back button
+        document.getElementById('back-button').addEventListener('click', function() {
+            window.location.href = '/';
+        });
+        
+        // Initialize current location button
+        document.getElementById('current-location-button').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Set pickup coordinates
+                    pickupCoords = {lat: lat, lng: lng};
+                    
+                    // Update map
+                    map.setView([lat, lng], 16);
+                    
+                    // Add marker
+                    if (pickupMarker) {
+                        map.removeLayer(pickupMarker);
+                    }
+                    
+                    const pickupIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: #FF5252; width: 12px; height: 12px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>',
+                        iconSize: [18, 18],
+                        iconAnchor: [9, 9]
+                    });
+                    
+                    pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map);
+                    
+                    // Update pickup display
+                    document.getElementById('pickup-display').textContent = 'Your current location';
+                    document.getElementById('pickup-display').style.color = '#000';
+                    
+                    // If destination is also set, draw route
+                    if (destinationCoords) {
+                        drawRoute(pickupCoords, destinationCoords);
+                    }
+                    
+                    // Update search button state
+                    updateSearchButtonState();
+                });
+            }
+        });
+        
+        // Initialize cancel selection button
+        document.getElementById('cancel-selection-button').addEventListener('click', function() {
+            document.getElementById('map-selection-indicator').style.display = 'none';
+            isSelectingOnMap = false;
+            currentSelectionType = '';
+        });
+        
+        // Initialize search button
+        document.getElementById('search-button').addEventListener('click', function() {
+            if (!this.disabled) {
+                alert('Finding riders near you...');
+            }
+        });
+        
+        // Initialize popular destinations
+        document.querySelectorAll('.popular-destination').forEach(function(el) {
+            el.addEventListener('click', function() {
+                const location = this.dataset.location;
+                document.getElementById('destination-display').textContent = location;
+                document.getElementById('destination-display').style.color = '#000';
+                
+                // Get coordinates for the location
+                if (locationCoordinates[location]) {
+                    const coords = locationCoordinates[location];
+                    destinationCoords = coords;
+                    
+                    // Add marker
+                    if (destinationMarker) {
+                        map.removeLayer(destinationMarker);
+                    }
+                    
+                    const destIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: #FF5252; width: 12px; height: 12px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>',
+                        iconSize: [18, 18],
+                        iconAnchor: [9, 9]
+                    });
+                    
+                    destinationMarker = L.marker([destinationCoords.lat, destinationCoords.lng], { icon: destIcon }).addTo(map);
+                    
+                    // If pickup is also set, draw route
+                    if (pickupCoords) {
+                        drawRoute(pickupCoords, destinationCoords);
+                    }
+                }
+                
+                // Update search button state
+                updateSearchButtonState();
+            });
+        });
+    }
+    
+    // Start map selection mode
+    function startMapSelection(type) {
+        isSelectingOnMap = true;
+        currentSelectionType = type;
+        document.getElementById('selection-type').textContent = type;
+        document.getElementById('map-selection-indicator').style.display = 'block';
+    }
+    
+    // Draw route on map using Leaflet Routing Machine
+    function drawRoute(pickupCoords, destinationCoords) {
+        // Clear existing route if any
+        if (routeControl) {
+            map.removeControl(routeControl);
+        }
+        
+        // Create route control
+        routeControl = L.Routing.control({
+            waypoints: [
+                L.latLng(pickupCoords.lat, pickupCoords.lng),
+                L.latLng(destinationCoords.lat, destinationCoords.lng)
+            ],
+            routeWhileDragging: false,
+            showAlternatives: false,
+            fitSelectedRoutes: true,
+            lineOptions: {
+                styles: [{
+                    color: '#FF5252',
+                    opacity: 0.7,
+                    weight: 5
+                }]
+            },
+            createMarker: function() { return null; }, // Don't create markers, we already have our own
+            addWaypoints: false,
+            draggableWaypoints: false
+        }).addTo(map);
+        
+        // Hide the routing control container (we don't need the UI)
+        routeControl.on('routesfound', function(e) {
+            const routes = e.routes;
+            const summary = routes[0].summary;
+            
+            // Calculate distance in km and duration in minutes
+            const distance = (summary.totalDistance / 1000).toFixed(1);
+            const duration = Math.round(summary.totalTime / 60);
+            
+            // Store current route info
+            currentRouteInfo = {
+                distance: distance,
+                duration: duration
+            };
+            
+            // Hide the routing control container
+            const routingContainer = document.querySelector('.leaflet-routing-container');
+            if (routingContainer) {
+                routingContainer.style.display = 'none';
+            }
+        });
+    }
+    
+    // Update search button state
+    function updateSearchButtonState() {
+        const searchButton = document.getElementById('search-button');
+        
+        if (pickupCoords && destinationCoords) {
+            searchButton.disabled = false;
+            searchButton.style.opacity = '1';
+        } else {
+            searchButton.disabled = true;
+            searchButton.style.opacity = '0.7';
+        }
+    }
+    
+    // Initialize ride selection functionality
+    function initRideSelection() {
+        // Show riders section when search button is clicked
+        document.getElementById('search-button').addEventListener('click', function() {
+            if (!this.disabled) {
+                document.getElementById('booking-form').style.display = 'none';
+                document.getElementById('riders-section').style.display = 'block';
+                
+                // Update ride info display
+                if (currentRouteInfo) {
+                    document.getElementById('ride-time-display').textContent = currentRouteInfo.duration + ' min';
+                    document.getElementById('ride-distance-display').textContent = currentRouteInfo.distance + ' km';
+                }
+            }
+        });
+        
+        // Handle change route button
+        document.getElementById('change-route-button').addEventListener('click', function() {
+            document.getElementById('riders-section').style.display = 'none';
+            document.getElementById('booking-form').style.display = 'block';
+        });
+        
+        // Handle ride option selection
+        document.querySelectorAll('.ride-option').forEach(function(option) {
+            option.addEventListener('click', function() {
+                // Remove active class from all options
+                document.querySelectorAll('.ride-option').forEach(function(opt) {
+                    opt.classList.remove('active');
+                    opt.style.border = '2px solid transparent';
+                    opt.style.backgroundColor = 'transparent';
+                });
+                
+                // Add active class to selected option
+                this.classList.add('active');
+                this.style.border = '2px solid #FF5252';
+                this.style.backgroundColor = 'rgba(255,82,82,0.05)';
+                
+                // Update price in confirmation
+                const price = this.querySelector('div:last-child').textContent;
+                document.getElementById('confirmation-price').textContent = price;
+            });
+        });
+        
+        // Handle rider selection
+        document.querySelectorAll('.select-rider-button').forEach(function(button, index) {
+            button.addEventListener('click', function() {
+                const riderItem = this.closest('.rider-item');
+                const riderName = riderItem.querySelector('div > div:first-child').textContent;
+                const riderRating = riderItem.querySelector('div > div:nth-child(2) > span:nth-child(2)').textContent;
+                const riderBike = riderItem.querySelector('div > div:nth-child(2) > span:nth-child(3)').textContent;
+                const riderAvatar = riderItem.querySelector('img').src;
+                
+                // Store selected rider info
+                selectedRider = {
+                    name: riderName,
+                    rating: riderRating,
+                    bike: riderBike,
+                    avatar: riderAvatar,
+                    index: index
+                };
+                
+                // Show confirmation overlay
+                showRideConfirmation();
+            });
+        });
+        
+        // Handle book ride button
+        document.getElementById('book-ride-button').addEventListener('click', function() {
+            if (selectedRider) {
+                showRideConfirmation();
+            } else {
+                alert('Please select a rider first');
+            }
+        });
+    }
+    
+    // Show ride confirmation overlay
+    function showRideConfirmation() {
+        // Show confirmation overlay
+        document.getElementById('ride-confirmation-overlay').style.display = 'block';
+        
+        // Initialize confirmation map
+        const confirmationMap = L.map('confirmation-map').setView([5.8003, -0.5103], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(confirmationMap);
+        
+        // Draw route on confirmation map
+        if (pickupCoords && destinationCoords) {
+            const confirmationRouteControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(pickupCoords.lat, pickupCoords.lng),
+                    L.latLng(destinationCoords.lat, destinationCoords.lng)
+                ],
+                routeWhileDragging: false,
+                showAlternatives: false,
+                fitSelectedRoutes: true,
+                lineOptions: {
+                    styles: [{
+                        color: '#FF5252',
+                        opacity: 0.7,
+                        weight: 5
+                    }]
+                },
+                createMarker: function() { return null; }, // Don't create markers
+                addWaypoints: false,
+                draggableWaypoints: false
+            }).addTo(confirmationMap);
+            
+            // Hide the routing control container
+            confirmationRouteControl.on('routesfound', function() {
+                const routingContainer = document.querySelector('#confirmation-map .leaflet-routing-container');
+                if (routingContainer) {
+                    routingContainer.style.display = 'none';
+                }
+            });
+        }
+        
+        // Update confirmation details
+        document.getElementById('confirmation-pickup').textContent = document.getElementById('pickup-display').textContent;
+        document.getElementById('confirmation-destination').textContent = document.getElementById('destination-display').textContent;
+        
+        if (currentRouteInfo) {
+            document.getElementById('confirmation-distance').textContent = currentRouteInfo.distance + ' km';
+            document.getElementById('confirmation-duration').textContent = currentRouteInfo.duration + ' min';
+        }
+        
+        // Update rider info
+        if (selectedRider) {
+            document.getElementById('confirmation-rider-name').textContent = selectedRider.name;
+            document.getElementById('confirmation-rider-rating').textContent = selectedRider.rating;
+            document.getElementById('confirmation-rider-bike').textContent = selectedRider.bike;
+            document.getElementById('confirmation-rider-avatar').src = selectedRider.avatar;
+        }
+        
+        // Handle back button
+        document.getElementById('back-to-riders-button').addEventListener('click', function() {
+            document.getElementById('ride-confirmation-overlay').style.display = 'none';
+        });
+        
+        // Handle confirm ride button
+        document.getElementById('confirm-ride-button').addEventListener('click', function() {
+            // Store ride info in session storage
+            const rideInfo = {
+                pickup: document.getElementById('confirmation-pickup').textContent,
+                destination: document.getElementById('confirmation-destination').textContent,
+                distance: document.getElementById('confirmation-distance').textContent,
+                duration: document.getElementById('confirmation-duration').textContent,
+                price: document.getElementById('confirmation-price').textContent,
+                rider: {
+                    name: selectedRider.name,
+                    rating: selectedRider.rating,
+                    bike: selectedRider.bike,
+                    avatar: selectedRider.avatar
+                },
+                status: 'confirmed',
+                timestamp: new Date().toISOString()
+            };
+            
+            // Save to session storage
+            sessionStorage.setItem('currentRide', JSON.stringify(rideInfo));
+            
+            // Redirect to homepage
+            alert('Ride confirmed! Redirecting to homepage...');
+            window.location.href = '/';
+        });
+    }
+    
+    // Initialize everything when the page loads
+    window.onload = function() {
+        // Initialize map
+        initMap();
+        
+        // Initialize form controls
+        initFormControls();
+        
+        // Initialize ride selection
+        initRideSelection();
+        
+        // Try to get user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                // Set pickup coordinates
+                pickupCoords = {lat: lat, lng: lng};
+                
+                // Update map
+                map.setView([lat, lng], 16);
+                
+                // Add marker
+                const pickupIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="background-color: #FF5252; width: 12px; height: 12px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>',
+                    iconSize: [18, 18],
+                    iconAnchor: [9, 9]
+                });
+                
+                pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map);
+                
+                // Update pickup display
+                document.getElementById('pickup-display').textContent = 'Your current location';
+                document.getElementById('pickup-display').style.color = '#000';
+                
+                // Update search button state
+                updateSearchButtonState();
+            });
+        }
+    };
+</script>
+</body>
+</html>

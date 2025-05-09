@@ -1,0 +1,491 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.app-container {
+    max-width: 500px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 70px; /* Space for bottom navigation */
+    overflow-x: hidden;
+}
+
+/* Header */
+header {
+    padding: 15px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.header-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.icon {
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+/* Main Content */
+main {
+    padding: 15px;
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 100;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    color: #757575;
+    text-decoration: none;
+    font-size: 0.7rem;
+    width: 20%;
+    text-align: center;
+}
+
+.nav-item.active {
+    color: #FF5722;
+}
+
+.nav-icon {
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+}
+
+/* Hero Banner */
+.hero-banner {
+    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://source.unsplash.com/random/800x600/?motorcycle');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 30px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.hero-banner h2 {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.hero-banner p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* Quick Actions */
+.quick-actions {
+    margin-bottom: 25px;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.action-button {
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    padding: 15px 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+
+.action-button:nth-child(2) {
+    background-color: #4CAF50;
+}
+
+.action-button .small-text {
+    font-size: 0.8rem;
+}
+
+.action-button .large-text {
+    font-size: 1rem;
+}
+
+/* Active Ride Card */
+.active-ride-card {
+    background-color: #FFF3E0;
+    border: 1px solid #FFB74D;
+    border-left: 4px solid #FF9800;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.ride-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ride-icon {
+    background-color: #FF9800;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-size: 1rem;
+}
+
+.ride-title {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.ride-status {
+    font-size: 0.85rem;
+    color: #424242;
+}
+
+.ride-locations {
+    background-color: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.location-item {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.location-item:last-child {
+    margin-bottom: 0;
+}
+
+.location-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    margin-top: 3px;
+}
+
+.pickup-marker {
+    background-color: #4CAF50;
+}
+
+.destination-marker {
+    background-color: #F44336;
+}
+
+.location-label {
+    font-size: 0.8rem;
+    color: #757575;
+}
+
+.location-value {
+    font-size: 0.9rem;
+}
+
+.rider-info {
+    display: flex;
+    align-items: center;
+}
+
+.rider-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.rider-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.rider-details {
+    font-size: 0.8rem;
+    color: #757575;
+}
+
+.view-ride-button {
+    background-color: #FF9800;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+    width: 100%;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Map Container */
+#map {
+    height: 250px;
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    z-index: 1;
+    position: relative;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: #757575;
+}
+
+.form-select, .form-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 0.95rem;
+    background-color: white;
+}
+
+.map-select-button {
+    position: absolute;
+    right: 10px;
+    top: 32px;
+    background-color: transparent;
+    border: none;
+    color: #FF5722;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.custom-location-indicator {
+    font-size: 0.8rem;
+    color: #4CAF50;
+    margin-top: 5px;
+}
+
+.search-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.search-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Rider Cards */
+.riders-section {
+    margin-bottom: 20px;
+}
+
+.riders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.change-route-button {
+    background: none;
+    border: none;
+    color: #FF5722;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.rider-card {
+    display: flex;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+    cursor: pointer;
+    background-color: white;
+}
+
+.rider-card-info {
+    flex: 1;
+}
+
+.rider-card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.rider-card-name {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.rider-card-price {
+    font-weight: bold;
+    color: #FF5722;
+}
+
+.rider-card-bike {
+    font-size: 0.85rem;
+    color: #757575;
+    margin-bottom: 5px;
+}
+
+.rider-card-rating {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.rider-card-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #757575;
+}
+
+/* Ride Confirmation Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.overlay-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    margin-right: 10px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.overlay-title {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.confirm-button, .cancel-button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+.confirm-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+.cancel-button {
+    background-color: #F44336;
+    color: white;
+    border: none;
+}
+
+/* Map Selection Mode */
+.map-selection-indicator {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 10;
+    text-align: center;
+}
+
+.cancel-selection-button {
+    background-color: #FF5722;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-top: 5px;
+    cursor: pointer;
+}

@@ -1,0 +1,466 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Hero Banner -->
+    <div class="hero-banner" style="background-image: url('/static/img/okada-ghana.webp'); background-size: cover; background-position: center; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.7); padding: 40px 20px; border-radius: 15px; margin: 15px; position: relative;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.4); border-radius: 15px;"></div>
+        <div style="position: relative; z-index: 1;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 10px;">Welcome to OrDa Rides</h2>
+            <p style="font-size: 1rem;">Connecting rural communities through affordable motorcycle transportation</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h3 class="section-title">Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="/templates/rides.html" class="action-button">
+                <span class="small-text">Book a</span>
+                <span class="large-text">Ride</span>
+            </a>
+            <a href="/orders" class="action-button">
+                <span class="small-text">Order</span>
+                <span class="large-text">Food & Items</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Active Ride (if any) - Bolt Style -->
+    <div id="active-ride-container" style="display: none; margin: 20px 0;">
+        <div style="background-color: #00C853; color: white; border-radius: 15px 15px 0 0; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 1.2rem; font-weight: bold;">Okada Ride</div>
+                    <div id="ride-status" style="font-size: 0.9rem; opacity: 0.9;">Rider is on the way</div>
+                </div>
+                <div style="background-color: rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 20px; font-size: 0.9rem;">
+                    <span id="ride-price">GH₵ 25</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; margin-top: 20px; align-items: center;">
+                <div style="background-color: white; color: #00C853; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;">A</div>
+                <div id="pickup-location" style="flex: 1;">Adeiso Market Square</div>
+            </div>
+            
+            <div style="display: flex; margin-top: 15px; align-items: center;">
+                <div style="background-color: white; color: #00C853; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;">B</div>
+                <div id="destination-location" style="flex: 1;">Adeiso Health Center</div>
+            </div>
+            
+            <div style="margin-top: 15px; font-size: 0.9rem;">
+                <span>Arrive by </span><span id="arrival-time">12:45 PM</span>
+            </div>
+        </div>
+        
+        <div style="background-color: white; border-radius: 0 0 15px 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 15px;">
+            <div style="display: flex; align-items: center;">
+                <img id="rider-avatar" src="" alt="Rider" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                <div style="flex: 1;">
+                    <div id="rider-name" style="font-weight: bold; font-size: 1rem;"></div>
+                    <div id="rider-bike" style="color: #757575; font-size: 0.9rem;"></div>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div style="width: 40px; height: 40px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 20px;">📞</span>
+                    </div>
+                    <div style="width: 40px; height: 40px; background-color: #F5F5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 20px;">💬</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; margin-top: 15px; gap: 10px;">
+                <button id="cancel-ride-button" style="flex: 1; padding: 12px; border: none; background-color: #F5F5F5; color: #212121; border-radius: 8px; font-weight: bold;">Cancel Ride</button>
+                <button style="flex: 1; padding: 12px; border: none; background-color: #00C853; color: white; border-radius: 8px; font-weight: bold;">Call Rider</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="section" style="padding: 15px;">
+        <h3 class="section-title" style="margin-bottom: 15px; font-size: 1.2rem;">Recent Activity</h3>
+        <div id="recent-activity-container">
+            <p id="no-activity-message">No recent activity to show</p>
+            <!-- Recent activities will be dynamically added here -->
+        </div>
+    </div>
+    
+    <!-- Order History Section -->
+    <div class="section" id="history-section" style="padding: 15px; display: none;">
+        <h3 class="section-title" style="margin-bottom: 15px; font-size: 1.2rem;">Order History</h3>
+        <div id="history-container">
+            <!-- Completed orders will be dynamically added here -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check for active ride in session storage first (from rides page)
+        const activeRideData = sessionStorage.getItem('activeRide');
+        
+        if (activeRideData) {
+            const ride = JSON.parse(activeRideData);
+            displayActiveRide(ride);
+            
+            // Set timers for automatic ride status updates
+            if (ride.status === 'confirmed' && !sessionStorage.getItem('notificationShown')) {
+                // Set flag to prevent duplicate notifications
+                sessionStorage.setItem('notificationShown', 'true');
+                
+                // After 10 seconds, update to 'in_progress'
+                setTimeout(function() {
+                    // Show rider arrived notification
+                    const riderArrivedMessage = document.createElement('div');
+                    riderArrivedMessage.style.position = 'fixed';
+                    riderArrivedMessage.style.top = '50%';
+                    riderArrivedMessage.style.left = '50%';
+                    riderArrivedMessage.style.transform = 'translate(-50%, -50%)';
+                    riderArrivedMessage.style.backgroundColor = '#4285F4';
+                    riderArrivedMessage.style.color = 'white';
+                    riderArrivedMessage.style.padding = '20px';
+                    riderArrivedMessage.style.borderRadius = '12px';
+                    riderArrivedMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                    riderArrivedMessage.style.zIndex = '1000';
+                    riderArrivedMessage.style.textAlign = 'center';
+                    riderArrivedMessage.innerHTML = `
+                        <div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Rider Has Arrived!</div>
+                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <img src="${ride.rider.avatar}" alt="Rider" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+                            <div>
+                                <div style="font-weight: 500;">${ride.rider.name}</div>
+                                <div style="font-size: 0.8rem;">${ride.rider.bike}</div>
+                            </div>
+                        </div>
+                        <div>Your trip has started</div>
+                    `;
+                    
+                    document.body.appendChild(riderArrivedMessage);
+                    
+                    // Update ride status in session storage
+                    ride.status = 'in_progress';
+                    sessionStorage.setItem('activeRide', JSON.stringify(ride));
+                    document.getElementById('ride-status').textContent = 'Ride in progress';
+                    
+                    // After 15 more seconds, update to 'completed'
+                    setTimeout(function() {
+                        // Remove rider arrived message if it still exists
+                        if (document.body.contains(riderArrivedMessage)) {
+                            document.body.removeChild(riderArrivedMessage);
+                        }
+                        
+                        // Show trip completed notification
+                        const tripCompletedMessage = document.createElement('div');
+                        tripCompletedMessage.style.position = 'fixed';
+                        tripCompletedMessage.style.top = '50%';
+                        tripCompletedMessage.style.left = '50%';
+                        tripCompletedMessage.style.transform = 'translate(-50%, -50%)';
+                        tripCompletedMessage.style.backgroundColor = '#00C853';
+                        tripCompletedMessage.style.color = 'white';
+                        tripCompletedMessage.style.padding = '20px';
+                        tripCompletedMessage.style.borderRadius = '12px';
+                        tripCompletedMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                        tripCompletedMessage.style.zIndex = '1000';
+                        tripCompletedMessage.style.textAlign = 'center';
+                        tripCompletedMessage.innerHTML = `
+                            <div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Trip Completed!</div>
+                            <div style="margin-bottom: 15px;">You have reached your destination</div>
+                            <div style="font-weight: 500; margin-bottom: 5px;">Total: ${ride.price}</div>
+                            <div style="font-size: 0.9rem;">Paid with ${ride.paymentMethod || 'Cash'}</div>
+                        `;
+                        
+                        document.body.appendChild(tripCompletedMessage);
+                        
+                        // Update ride status in session storage
+                        ride.status = 'completed';
+                        sessionStorage.setItem('activeRide', JSON.stringify(ride));
+                        document.getElementById('ride-status').textContent = 'Ride completed';
+                        
+                        // Remove message after 3 seconds
+                        setTimeout(function() {
+                            if (document.body.contains(tripCompletedMessage)) {
+                                document.body.removeChild(tripCompletedMessage);
+                            }
+                        }, 3000);
+                        
+                    }, 15000); // 15 seconds for trip duration
+                    
+                }, 10000); // 10 seconds for rider arrival
+            }
+        } else {
+            // If not in session storage, check from API
+            fetch('/api/active_ride')
+                .then(response => response.json())
+                .then(ride => {
+                    if (ride) {
+                        displayActiveRide(ride);
+                    }
+                })
+                .catch(error => console.error('Error fetching active ride:', error));
+        }
+        
+        // Check for recent orders in session storage
+        loadRecentActivities();
+        
+        // Function to display active ride
+        function displayActiveRide(ride) {
+            // Update ride details
+            document.getElementById('pickup-location').textContent = ride.pickup;
+            document.getElementById('destination-location').textContent = ride.destination;
+            
+            // Update price
+            document.getElementById('ride-price').textContent = ride.price || ride.rider.price;
+            
+            // Update arrival time
+            document.getElementById('arrival-time').textContent = ride.estimatedArrival || '15 min';
+            
+            // Update status message
+            if (ride.status === 'confirmed' || ride.status === 'active') {
+                document.getElementById('ride-status').textContent = 'Rider is on the way';
+            } else if (ride.status === 'on_the_way') {
+                document.getElementById('ride-status').textContent = 'Ride in progress';
+            } else if (ride.status === 'completed') {
+                document.getElementById('ride-status').textContent = 'Ride completed';
+            }
+            
+            // Update rider info
+            document.getElementById('rider-avatar').src = ride.rider.avatar;
+            document.getElementById('rider-name').textContent = ride.rider.name;
+            document.getElementById('rider-bike').textContent = ride.rider.bike;
+            
+            // Show the active ride container
+            document.getElementById('active-ride-container').style.display = 'block';
+            
+            // Add event listeners to buttons
+            const cancelButton = document.getElementById('cancel-ride-button');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to cancel this ride?')) {
+                        // Show loading state
+                        cancelButton.textContent = 'Cancelling...';
+                        cancelButton.disabled = true;
+                        
+                        // Remove from session storage
+                        sessionStorage.removeItem('activeRide');
+                        
+                        // Hide active ride container
+                        document.getElementById('active-ride-container').style.display = 'none';
+                        
+                        // Show success message
+                        const successMessage = document.createElement('div');
+                        successMessage.style.position = 'fixed';
+                        successMessage.style.top = '50%';
+                        successMessage.style.left = '50%';
+                        successMessage.style.transform = 'translate(-50%, -50%)';
+                        successMessage.style.backgroundColor = '#FF5252';
+                        successMessage.style.color = 'white';
+                        successMessage.style.padding = '20px';
+                        successMessage.style.borderRadius = '12px';
+                        successMessage.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                        successMessage.style.zIndex = '1000';
+                        successMessage.style.textAlign = 'center';
+                        successMessage.innerHTML = '<div style="font-weight: bold; margin-bottom: 10px; font-size: 1.2rem;">Ride Cancelled</div><div>Your ride has been cancelled</div>';
+                        
+                        document.body.appendChild(successMessage);
+                        
+                        // Remove message after 3 seconds
+                        setTimeout(function() {
+                            if (document.body.contains(successMessage)) {
+                                document.body.removeChild(successMessage);
+                            }
+                        }, 3000);
+                    }
+                });
+            }
+            
+            const callButton = document.querySelector('button[style*="background-color: #00C853"]');
+            if (callButton) {
+                callButton.addEventListener('click', function() {
+                    alert('Calling your rider (demo)');
+                    // In a real app, would initiate a call
+                });
+            }
+        }
+        
+        // Function to load and display recent activities and history
+        function loadRecentActivities() {
+            const recentActivityContainer = document.getElementById('recent-activity-container');
+            const historyContainer = document.getElementById('history-container');
+            const historySection = document.getElementById('history-section');
+            const noActivityMessage = document.getElementById('no-activity-message');
+            let hasActivity = false;
+            let hasHistory = false;
+            
+            // Check for recent food orders
+            const orderData = sessionStorage.getItem('orda_order_data');
+            if (orderData) {
+                const order = JSON.parse(orderData);
+                
+                // Create order activity card
+                const orderCard = document.createElement('div');
+                orderCard.style.backgroundColor = 'white';
+                orderCard.style.borderRadius = '15px';
+                orderCard.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                orderCard.style.padding = '15px';
+                orderCard.style.marginBottom = '15px';
+                
+                // Get shop name and total items
+                let shopName = 'Food Order';
+                let totalItems = 0;
+                
+                if (order.items && order.items.length > 0) {
+                    totalItems = order.items.length;
+                    // Try to get the first item's shop name
+                    if (order.items[0].shopName) {
+                        shopName = order.items[0].shopName;
+                    }
+                }
+                
+                // Format date
+                const orderDate = new Date(order.orderDate);
+                const formattedDate = orderDate.toLocaleDateString() + ' ' + 
+                                     orderDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Check if order is completed
+                const isCompleted = order.status === 'completed';
+                
+                // Build order card content
+                orderCard.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 50px; height: 50px; background-color: #FF9800; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                            <span style="font-size: 24px;">🍔</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 1rem;">${shopName}</div>
+                            <div style="color: #757575; font-size: 0.9rem;">${totalItems} item(s) • ${formattedDate}</div>
+                        </div>
+                        <div style="font-weight: bold;">${order.totals ? 'GH₵ ' + order.totals.total.toFixed(2) : ''}</div>
+                    </div>
+                    <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+                        <div style="background-color: #F5F5F5; color: #212121; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem;">
+                            ${order.orderId}
+                        </div>
+                        ${isCompleted ? 
+                            `<div style="background-color: #00C853; color: white; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem;">
+                                Completed
+                            </div>` : 
+                            `<a href="/order/track/${order.orderId}" style="background-color: #00C853; color: white; text-decoration: none; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem;">
+                                Track Order
+                            </a>`
+                        }
+                    </div>
+                `;
+                
+                // Add to appropriate container based on status
+                if (isCompleted) {
+                    historyContainer.appendChild(orderCard);
+                    hasHistory = true;
+                } else {
+                    recentActivityContainer.appendChild(orderCard);
+                    hasActivity = true;
+                }
+            }
+            
+            // Check for active rides
+            const activeRideData = sessionStorage.getItem('activeRide');
+            if (activeRideData) {
+                const ride = JSON.parse(activeRideData);
+                
+                // Create ride activity card
+                const rideCard = document.createElement('div');
+                rideCard.style.backgroundColor = 'white';
+                rideCard.style.borderRadius = '15px';
+                rideCard.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                rideCard.style.padding = '15px';
+                rideCard.style.marginBottom = '15px';
+                
+                // Format date
+                const rideDate = new Date();
+                const formattedDate = rideDate.toLocaleDateString() + ' ' + 
+                                     rideDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Build ride card content
+                rideCard.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 50px; height: 50px; background-color: #00C853; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                            <span style="font-size: 24px;">🏍️</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 1rem;">Okada Ride</div>
+                            <div style="color: #757575; font-size: 0.9rem;">${ride.pickup} to ${ride.destination} • ${formattedDate}</div>
+                        </div>
+                        <div style="font-weight: bold;">${ride.price || ride.rider.price}</div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div style="background-color: #F5F5F5; color: #212121; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">
+                            Active
+                        </div>
+                    </div>
+                `;
+                
+                // Add to container
+                recentActivityContainer.appendChild(rideCard);
+                hasActivity = true;
+            }
+            
+            // Check for completed rides
+            const completedRideData = sessionStorage.getItem('completedRide');
+            if (completedRideData) {
+                const ride = JSON.parse(completedRideData);
+                
+                // Create ride activity card
+                const rideCard = document.createElement('div');
+                rideCard.style.backgroundColor = 'white';
+                rideCard.style.borderRadius = '15px';
+                rideCard.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                rideCard.style.padding = '15px';
+                rideCard.style.marginBottom = '15px';
+                
+                // Format date
+                const rideDate = ride.completedAt ? new Date(ride.completedAt) : new Date();
+                const formattedDate = rideDate.toLocaleDateString() + ' ' + 
+                                     rideDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Build ride card content
+                rideCard.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 50px; height: 50px; background-color: #00C853; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                            <span style="font-size: 24px;">🏍️</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; font-size: 1rem;">Okada Ride</div>
+                            <div style="color: #757575; font-size: 0.9rem;">${ride.pickup} to ${ride.destination} • ${formattedDate}</div>
+                        </div>
+                        <div style="font-weight: bold;">${ride.price || ride.rider.price}</div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div style="background-color: #F5F5F5; color: #212121; padding: 8px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;">
+                            Completed
+                        </div>
+                    </div>
+                `;
+                
+                // Add to history container
+                historyContainer.appendChild(rideCard);
+                hasHistory = true;
+            }
+            
+            // Show or hide the no activity message
+            if (hasActivity) {
+                noActivityMessage.style.display = 'none';
+            } else {
+                noActivityMessage.style.display = 'block';
+            }
+            
+            // Show or hide the history section
+            if (hasHistory) {
+                historySection.style.display = 'block';
+            } else {
+                historySection.style.display = 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}

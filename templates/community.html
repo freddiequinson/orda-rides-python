@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Community Header with Tabs -->
+    <div class="community-header" style="background-color: #00C853; color: white; padding: 20px 15px;">
+        <h2 style="margin-bottom: 15px; font-size: 1.5rem;">Adeiso Community</h2>
+        <p style="margin-bottom: 20px; opacity: 0.9; font-size: 0.9rem;">Stay connected with local news and events</p>
+        
+        <div class="community-tabs" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;">
+            <div class="tab active" data-tab="news" style="padding: 8px 15px; background-color: white; color: #00C853; border-radius: 20px; font-weight: bold; cursor: pointer; white-space: nowrap;">News</div>
+            <div class="tab" data-tab="events" style="padding: 8px 15px; background-color: rgba(255,255,255,0.2); color: white; border-radius: 20px; cursor: pointer; white-space: nowrap;">Events</div>
+            <div class="tab" data-tab="announcements" style="padding: 8px 15px; background-color: rgba(255,255,255,0.2); color: white; border-radius: 20px; cursor: pointer; white-space: nowrap;">Announcements</div>
+            <div class="tab" data-tab="jobs" style="padding: 8px 15px; background-color: rgba(255,255,255,0.2); color: white; border-radius: 20px; cursor: pointer; white-space: nowrap;">Jobs</div>
+        </div>
+    </div>
+    
+    <!-- News Feed -->
+    <div id="news-tab" class="tab-content" style="padding: 15px;">
+        <!-- News Item 1 -->
+        <div class="news-item" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="height: 150px; background-color: #2196F3; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🏗️</div>
+            <div style="padding: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div style="font-weight: bold; font-size: 1.1rem;">New Community Center Opens</div>
+                    <div style="color: #757575; font-size: 0.8rem;">2 hours ago</div>
+                </div>
+                <p style="margin-bottom: 15px; color: #212121; font-size: 0.9rem;">The new Adeiso Community Center has officially opened today. The center will provide various services including a library, computer lab, and meeting spaces for local organizations.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 15px;">
+                        <span style="color: #757575; font-size: 0.9rem;">👍 45</span>
+                        <span style="color: #757575; font-size: 0.9rem;">💬 12</span>
+                    </div>
+                    <button style="background-color: #F5F5F5; border: none; padding: 8px 12px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">Read More</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- News Item 2 -->
+        <div class="news-item" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="height: 150px; background-color: #4CAF50; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🌱</div>
+            <div style="padding: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div style="font-weight: bold; font-size: 1.1rem;">Community Garden Initiative</div>
+                    <div style="color: #757575; font-size: 0.8rem;">Yesterday</div>
+                </div>
+                <p style="margin-bottom: 15px; color: #212121; font-size: 0.9rem;">The Adeiso Agricultural Department has launched a community garden initiative to promote sustainable farming practices and food security in the region.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 15px;">
+                        <span style="color: #757575; font-size: 0.9rem;">👍 32</span>
+                        <span style="color: #757575; font-size: 0.9rem;">💬 8</span>
+                    </div>
+                    <button style="background-color: #F5F5F5; border: none; padding: 8px 12px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">Read More</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- News Item 3 -->
+        <div class="news-item" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="height: 150px; background-color: #FFC107; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🏫</div>
+            <div style="padding: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <div style="font-weight: bold; font-size: 1.1rem;">Local School Receives Technology Grant</div>
+                    <div style="color: #757575; font-size: 0.8rem;">2 days ago</div>
+                </div>
+                <p style="margin-bottom: 15px; color: #212121; font-size: 0.9rem;">Adeiso Secondary School has received a technology grant to equip its computer lab with new computers and internet access, benefiting over 500 students.</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 15px;">
+                        <span style="color: #757575; font-size: 0.9rem;">👍 67</span>
+                        <span style="color: #757575; font-size: 0.9rem;">💬 23</span>
+                    </div>
+                    <button style="background-color: #F5F5F5; border: none; padding: 8px 12px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">Read More</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Events Tab (Hidden by default) -->
+    <div id="events-tab" class="tab-content" style="padding: 15px; display: none;">
+        <!-- Event Item 1 -->
+        <div class="event-item" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="padding: 15px; display: flex; gap: 15px;">
+                <div style="min-width: 60px; height: 60px; background-color: #F44336; color: white; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="font-weight: bold; font-size: 1.2rem;">15</div>
+                    <div style="font-size: 0.8rem;">May</div>
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">Adeiso Cultural Festival</div>
+                    <div style="color: #757575; font-size: 0.9rem; margin-bottom: 10px;">📍 Adeiso Town Square • 10:00 AM - 6:00 PM</div>
+                    <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Join us for a day of cultural celebrations, traditional music, dance, and food from the Adeiso region.</p>
+                    <button style="background-color: #00C853; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">RSVP</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Event Item 2 -->
+        <div class="event-item" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="padding: 15px; display: flex; gap: 15px;">
+                <div style="min-width: 60px; height: 60px; background-color: #2196F3; color: white; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="font-weight: bold; font-size: 1.2rem;">22</div>
+                    <div style="font-size: 0.8rem;">May</div>
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">Farmers Market</div>
+                    <div style="color: #757575; font-size: 0.9rem; margin-bottom: 10px;">📍 Adeiso Market Square • 8:00 AM - 2:00 PM</div>
+                    <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Local farmers will be selling fresh produce, crafts, and homemade goods at the weekly farmers market.</p>
+                    <button style="background-color: #00C853; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">RSVP</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Event Item 3 -->
+        <div class="event-item" style="background-color: white; border-radius: 8px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="padding: 15px; display: flex; gap: 15px;">
+                <div style="min-width: 60px; height: 60px; background-color: #9C27B0; color: white; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div style="font-weight: bold; font-size: 1.2rem;">30</div>
+                    <div style="font-size: 0.8rem;">May</div>
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">Community Health Workshop</div>
+                    <div style="color: #757575; font-size: 0.9rem; margin-bottom: 10px;">📍 Adeiso Health Center • 2:00 PM - 4:00 PM</div>
+                    <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Free health screenings and educational workshop on preventive healthcare practices for all community members.</p>
+                    <button style="background-color: #00C853; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">RSVP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Announcements Tab (Hidden by default) -->
+    <div id="announcements-tab" class="tab-content" style="padding: 15px; display: none;">
+        <div class="announcement-item" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 40px; height: 40px; background-color: #F44336; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">🚨</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">Road Closure Notice</div>
+            </div>
+            <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Main Street will be closed for repairs from May 16-18. Please use alternate routes during this time.</p>
+            <div style="color: #757575; font-size: 0.8rem;">Posted by Adeiso Municipal Authority • 1 day ago</div>
+        </div>
+        
+        <div class="announcement-item" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 40px; height: 40px; background-color: #4CAF50; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">💧</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">Water Supply Update</div>
+            </div>
+            <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Water supply will be temporarily interrupted on May 20 from 9 AM to 2 PM due to maintenance work on the main pipeline.</p>
+            <div style="color: #757575; font-size: 0.8rem;">Posted by Adeiso Water Authority • 3 days ago</div>
+        </div>
+        
+        <div class="announcement-item" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div style="width: 40px; height: 40px; background-color: #FFC107; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">📣</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">Community Meeting</div>
+            </div>
+            <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">A town hall meeting will be held on May 25 at 6 PM at the Community Center to discuss upcoming development projects.</p>
+            <div style="color: #757575; font-size: 0.8rem;">Posted by Adeiso Community Council • 5 days ago</div>
+        </div>
+    </div>
+    
+    <!-- Jobs Tab (Hidden by default) -->
+    <div id="jobs-tab" class="tab-content" style="padding: 15px; display: none;">
+        <div class="job-item" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">Teacher - Adeiso Secondary School</div>
+            <div style="color: #757575; font-size: 0.9rem; margin-bottom: 10px;">💼 Full-time • Posted 2 days ago</div>
+            <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Seeking a qualified Mathematics teacher for grades 7-9. Must have a teaching certificate and at least 2 years of experience.</p>
+            <button style="background-color: #00C853; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">Apply Now</button>
+        </div>
+        
+        <div class="job-item" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">Motorcycle Rider - OrDa Rides</div>
+            <div style="color: #757575; font-size: 0.9rem; margin-bottom: 10px;">💼 Part-time/Full-time • Posted 3 days ago</div>
+            <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Join our team of motorcycle riders! Must have a valid driver's license, own motorcycle, and knowledge of Adeiso area.</p>
+            <button style="background-color: #00C853; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">Apply Now</button>
+        </div>
+        
+        <div class="job-item" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">Cashier - Adeiso Market</div>
+            <div style="color: #757575; font-size: 0.9rem; margin-bottom: 10px;">💼 Full-time • Posted 5 days ago</div>
+            <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Looking for a reliable cashier for our grocery store. Experience with cash handling and customer service required.</p>
+            <button style="background-color: #00C853; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">Apply Now</button>
+        </div>
+        
+        <div class="job-item" style="background-color: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">Agricultural Assistant - Adeiso Farms</div>
+            <div style="color: #757575; font-size: 0.9rem; margin-bottom: 10px;">💼 Seasonal • Posted 1 week ago</div>
+            <p style="color: #212121; font-size: 0.9rem; margin-bottom: 10px;">Seasonal work available at local farms. Duties include planting, harvesting, and general farm maintenance. No experience necessary.</p>
+            <button style="background-color: #00C853; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; cursor: pointer;">Apply Now</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                
+                // Update tab styles
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.style.backgroundColor = 'rgba(255,255,255,0.2)';
+                    t.style.color = 'white';
+                });
+                
+                this.classList.add('active');
+                this.style.backgroundColor = 'white';
+                this.style.color = '#00C853';
+                
+                // Show the selected tab content
+                tabContents.forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                document.getElementById(tabName + '-tab').style.display = 'block';
+            });
+        });
+        
+        // Interactive buttons
+        const actionButtons = document.querySelectorAll('button');
+        
+        actionButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const buttonText = this.textContent.trim();
+                
+                if (buttonText === 'Read More') {
+                    const newsTitle = this.closest('.news-item').querySelector('div > div:first-child').textContent;
+                    alert(`You selected to read more about: ${newsTitle}\n\nFull article coming soon!`);
+                } else if (buttonText === 'RSVP') {
+                    const eventTitle = this.closest('.event-item').querySelector('div > div:first-child').textContent;
+                    alert(`You are RSVP'ing to: ${eventTitle}\n\nRSVP feature coming soon!`);
+                } else if (buttonText === 'Apply Now') {
+                    const jobTitle = this.closest('.job-item').querySelector('div:first-child').textContent;
+                    alert(`You are applying for: ${jobTitle}\n\nApplication feature coming soon!`);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

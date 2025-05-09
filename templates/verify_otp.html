@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- OTP Verification Container -->
+    <div class="otp-container" style="padding: 20px; max-width: 400px; margin: 0 auto;">
+        <!-- Logo and App Name -->
+        <div style="text-align: center; margin-bottom: 30px; margin-top: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🏍️</div>
+            <h1 style="font-size: 1.8rem; margin-bottom: 5px;">OrDa Rides</h1>
+            <p style="color: #757575; font-size: 0.9rem;">Connecting rural communities</p>
+        </div>
+        
+        <!-- OTP Verification Form -->
+        <div class="otp-form" style="background-color: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="margin-bottom: 20px; font-size: 1.5rem; text-align: center;">Verify Your Phone</h2>
+            
+            <p style="margin-bottom: 20px; text-align: center; color: #757575; font-size: 0.9rem;">
+                We've sent a verification code to <span id="phone-display">your phone</span>
+            </p>
+            
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 25px;">
+                <input type="text" maxlength="1" class="otp-input" style="width: 45px; height: 50px; text-align: center; font-size: 1.5rem; border: 1px solid #E0E0E0; border-radius: 5px;">
+                <input type="text" maxlength="1" class="otp-input" style="width: 45px; height: 50px; text-align: center; font-size: 1.5rem; border: 1px solid #E0E0E0; border-radius: 5px;">
+                <input type="text" maxlength="1" class="otp-input" style="width: 45px; height: 50px; text-align: center; font-size: 1.5rem; border: 1px solid #E0E0E0; border-radius: 5px;">
+                <input type="text" maxlength="1" class="otp-input" style="width: 45px; height: 50px; text-align: center; font-size: 1.5rem; border: 1px solid #E0E0E0; border-radius: 5px;">
+                <input type="text" maxlength="1" class="otp-input" style="width: 45px; height: 50px; text-align: center; font-size: 1.5rem; border: 1px solid #E0E0E0; border-radius: 5px;">
+                <input type="text" maxlength="1" class="otp-input" style="width: 45px; height: 50px; text-align: center; font-size: 1.5rem; border: 1px solid #E0E0E0; border-radius: 5px;">
+            </div>
+            
+            <button id="verify-button" style="width: 100%; padding: 15px; background-color: #00C853; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 20px;">
+                Verify
+            </button>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span id="timer" style="color: #757575; font-size: 0.9rem;">Resend code in 60s</span>
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="resend-button" style="background: none; border: none; color: #00C853; font-size: 0.9rem; cursor: pointer; text-decoration: underline;" disabled>
+                    Resend Code
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide bottom navigation on OTP verification page
+        const bottomNav = document.querySelector('.bottom-nav');
+        if (bottomNav) {
+            bottomNav.style.display = 'none';
+        }
+        
+        // Hide header on OTP verification page
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.display = 'none';
+        }
+        
+        // Get user data from session storage
+        const userData = JSON.parse(sessionStorage.getItem('orda_user_temp') || '{}');
+        const phoneDisplay = document.getElementById('phone-display');
+        
+        if (phoneDisplay && userData.phone) {
+            phoneDisplay.textContent = userData.phone;
+        }
+        
+        // OTP input handling
+        const otpInputs = document.querySelectorAll('.otp-input');
+        
+        otpInputs.forEach((input, index) => {
+            // Auto-focus next input after entering a digit
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            
+            // Handle backspace to go to previous input
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+        
+        // Focus first input on page load
+        otpInputs[0].focus();
+        
+        // Timer for resend code
+        let timeLeft = 60;
+        const timer = document.getElementById('timer');
+        const resendButton = document.getElementById('resend-button');
+        
+        const countdownInterval = setInterval(function() {
+            timeLeft--;
+            
+            if (timer) {
+                timer.textContent = `Resend code in ${timeLeft}s`;
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                
+                if (timer) {
+                    timer.style.display = 'none';
+                }
+                
+                if (resendButton) {
+                    resendButton.disabled = false;
+                }
+            }
+        }, 1000);
+        
+        // Resend code button
+        resendButton.addEventListener('click', function() {
+            // In a real app, this would trigger a new OTP to be sent
+            alert('A new verification code has been sent to your phone.');
+            
+            // Reset timer
+            timeLeft = 60;
+            timer.textContent = `Resend code in ${timeLeft}s`;
+            timer.style.display = 'block';
+            resendButton.disabled = true;
+            
+            // Restart countdown
+            const newCountdownInterval = setInterval(function() {
+                timeLeft--;
+                
+                if (timer) {
+                    timer.textContent = `Resend code in ${timeLeft}s`;
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(newCountdownInterval);
+                    
+                    if (timer) {
+                        timer.style.display = 'none';
+                    }
+                    
+                    if (resendButton) {
+                        resendButton.disabled = false;
+                    }
+                }
+            }, 1000);
+        });
+        
+        // Verify button
+        const verifyButton = document.getElementById('verify-button');
+        
+        verifyButton.addEventListener('click', function() {
+            let otp = '';
+            
+            // Collect OTP from inputs
+            otpInputs.forEach(input => {
+                otp += input.value;
+            });
+            
+            // Check if OTP is complete
+            if (otp.length !== 6) {
+                alert('Please enter the complete 6-digit verification code.');
+                return;
+            }
+            
+            // Show loading state
+            verifyButton.textContent = 'Verifying...';
+            verifyButton.disabled = true;
+            
+            // Send verification request to API
+            fetch('/api/verify-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ otp: otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Get the user data from temporary storage
+                    const tempUserData = JSON.parse(sessionStorage.getItem('orda_user_temp') || '{}');
+                    
+                    // Save the verified user data to permanent storage
+                    sessionStorage.setItem('orda_user', JSON.stringify(tempUserData));
+                    
+                    // Clear temporary storage
+                    sessionStorage.removeItem('orda_user_temp');
+                    
+                    // Show success message
+                    alert('Phone number verified successfully!');
+                    
+                    // Redirect to login page
+                    window.location.href = '/login';
+                } else {
+                    alert('Verification failed: ' + data.message);
+                    verifyButton.textContent = 'Verify';
+                    verifyButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during verification.');
+                verifyButton.textContent = 'Verify';
+                verifyButton.disabled = false;
+            });
+        });
+    });
+</script>
+{% endblock %}
